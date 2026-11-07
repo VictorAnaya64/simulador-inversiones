@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}{% if tipo == 'COMPRA' %}Comprar{% else %}Vender{% endif %} {{ instrumento.ticker }}{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3">{% if tipo == 'COMPRA' %}Comprar{% else %}Vender{% endif %} {{ instrumento.ticker }} &mdash; {{ instrumento.nombre }}</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-metrica mb-3">
+            <div class="card-body">
+                <p class="mb-1">Efectivo disponible en {{ instrumento.moneda }}:
+                    <strong>
+                    {% if instrumento.moneda == 'MXN' %}{{ portafolio.efectivo_mxn|floatformat:2 }}{% else %}{{ portafolio.efectivo_usd|floatformat:2 }}{% endif %}
+                    </strong>
+                </p>
+                {% if posicion %}
+                <p class="mb-0">Titulos disponibles para vender: <strong>{{ posicion.cantidad_disponible|floatformat:0 }}</strong></p>
+                {% else %}
+                <p class="mb-0 text-muted">No tienes titulos de este instrumento todavia.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card card-metrica">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.clave_idempotencia }}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.cantidad.id_for_label }}">Cantidad (titulos enteros)</label>
+                        {{ form.cantidad }}
+                        {% for error in form.cantidad.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    <p class="text-muted small">
+                        La orden se ejecutara al precio de cierre de la siguiente sesion bursatil
+                        disponible (no se usan precios futuros ni el precio del mismo dia).
+                    </p>
+                    <button type="submit" class="btn {% if tipo == 'COMPRA' %}btn-success{% else %}btn-danger{% endif %}">
+                        Confirmar {% if tipo == 'COMPRA' %}compra{% else %}venta{% endif %}
+                    </button>
+                    <a href="{% url 'mercados:detalle_instrumento' instrumento.id %}" class="btn btn-outline-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

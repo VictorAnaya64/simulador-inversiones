@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Mercado{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3">Mercado de instrumentos</h1>
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por ticker o nombre...">
+        <button class="btn btn-primary" type="submit">Buscar</button>
+    </div>
+</form>
+
+<div class="card card-metrica">
+    <div class="card-body">
+        <table class="table tabla-compacta mb-0">
+            <thead>
+                <tr><th>Ticker</th><th>Nombre</th><th>Bolsa</th><th>Moneda</th><th>Tipo</th><th>Ultimo cierre</th><th>Fecha</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for fila in filas %}
+                <tr>
+                    <td><strong>{{ fila.instrumento.ticker }}</strong></td>
+                    <td>{{ fila.instrumento.nombre }}</td>
+                    <td>{{ fila.instrumento.bolsa }}</td>
+                    <td>{{ fila.instrumento.moneda }}</td>
+                    <td>{{ fila.instrumento.get_tipo_instrumento_display }}</td>
+                    <td>{% if fila.precio %}{{ fila.precio.cierre|floatformat:2 }}{% else %}N/D{% endif %}</td>
+                    <td>{% if fila.precio %}{{ fila.precio.fecha }}{% else %}N/D{% endif %}</td>
+                    <td><a href="{% url 'mercados:detalle_instrumento' fila.instrumento.id %}" class="btn btn-sm btn-outline-primary">Ver</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4">No se encontraron instrumentos.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

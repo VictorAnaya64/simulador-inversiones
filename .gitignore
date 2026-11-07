@@ -1,0 +1,39 @@
+# Entorno
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Configuracion con secretos
+.env
+
+# Base de datos local
+db.sqlite3
+db.sqlite3-journal
+
+# Archivos estaticos / media generados
+/staticfiles/
+/media/
+
+# Logs
+/logs/
+*.log
+
+# Reportes exportados
+/exports/
+
+# Locust
+locust_reports/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Coverage / pytest
+.coverage
+.pytest_cache/
+htmlcov/

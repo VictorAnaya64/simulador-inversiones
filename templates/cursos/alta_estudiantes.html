@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titulo %}Alta de estudiantes{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3">Dar de alta estudiantes &mdash; {{ curso.nombre }}</h1>
+
+{% if creados %}
+<div class="alert alert-success">
+    <p class="mb-2">Se crearon las siguientes cuentas. Comparte estas contrasenas de forma segura con cada estudiante (no se mostraran de nuevo):</p>
+    <table class="table table-sm mb-0">
+        <thead><tr><th>Usuario</th><th>Contrasena inicial</th></tr></thead>
+        <tbody>
+        {% for c in creados %}
+            <tr><td>{{ c.username }}</td><td><code>{{ c.password }}</code></td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card card-metrica h-100">
+            <div class="card-body">
+                <h2 class="h5">Alta individual</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form_individual %}
+                    <div class="mb-2">
+                        <label class="form-label small" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary btn-sm">Crear estudiante</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-metrica h-100">
+            <div class="card-body">
+                <h2 class="h5">Alta masiva por CSV</h2>
+                <p class="text-muted small">Columnas esperadas: username,first_name,last_name,matricula,email</p>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% for field in form_csv %}
+                    <div class="mb-2">
+                        <label class="form-label small" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary btn-sm">Cargar CSV</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

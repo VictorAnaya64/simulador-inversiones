@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Crear curso{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3">Crear curso</h1>
+<div class="card card-metrica">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Guardar curso</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

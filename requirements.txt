@@ -1,0 +1,12 @@
+# Dependencias de produccion (instalar en cPanel via Setup Python App).
+# Mantener al minimo: cada paquete agregado debe justificarse en
+# docs/arquitectura.md.
+
+Django>=5.2,<5.3
+python-decouple==3.8
+PyMySQL==1.2.3
+numpy==2.5.4
+pandas==3.1.1
+scipy==1.18.1
+plotly==7.1.0
+openpyxl==3.1.5

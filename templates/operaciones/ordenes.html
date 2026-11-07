@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Mis operaciones{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3">Mis operaciones</h1>
+<div class="card card-metrica">
+    <div class="card-body">
+        <table class="table tabla-compacta mb-0">
+            <thead>
+                <tr><th>Fecha solicitud</th><th>Tipo</th><th>Instrumento</th><th>Cantidad</th><th>Estado</th><th>Sesion objetivo</th><th>Detalle</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for orden in ordenes %}
+                <tr>
+                    <td>{{ orden.fecha_solicitud|date:"d/m/Y H:i" }}</td>
+                    <td>{{ orden.get_tipo_display }}</td>
+                    <td>{{ orden.instrumento.ticker }}</td>
+                    <td>{{ orden.cantidad|floatformat:0 }}</td>
+                    <td>
+                        {% if orden.estado == 'EJECUTADA' %}<span class="badge bg-success">Ejecutada</span>
+                        {% elif orden.estado == 'PENDIENTE' %}<span class="badge bg-warning text-dark">Pendiente</span>
+                        {% elif orden.estado == 'CANCELADA' %}<span class="badge bg-secondary">Cancelada</span>
+                        {% else %}<span class="badge bg-danger">Rechazada</span>{% endif %}
+                    </td>
+                    <td>{{ orden.fecha_sesion_objetivo }}</td>
+                    <td class="small text-muted">
+                        {% if orden.estado == 'EJECUTADA' %}@ {{ orden.ejecucion.precio_ejecucion|floatformat:2 }}
+                        {% elif orden.estado == 'RECHAZADA' %}{{ orden.motivo_rechazo }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if orden.estado == 'PENDIENTE' %}
+                        <form method="post" action="{% url 'operaciones:cancelar_orden' orden.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4">Aun no tienes operaciones.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

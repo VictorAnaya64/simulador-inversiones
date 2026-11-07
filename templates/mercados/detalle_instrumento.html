@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}{{ instrumento.ticker }}{% endblock %}
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="h3 mb-0">{{ instrumento.ticker }} &mdash; {{ instrumento.nombre }}</h1>
+        <p class="text-muted mb-0">{{ instrumento.bolsa }} &middot; {{ instrumento.moneda }} &middot; {{ instrumento.get_tipo_instrumento_display }} &middot; {{ instrumento.pais }}</p>
+    </div>
+    {% if user.es_estudiante %}
+    <div>
+        <a href="{% url 'operaciones:nueva_orden' instrumento.id 'COMPRA' %}" class="btn btn-success">Comprar</a>
+        <a href="{% url 'operaciones:nueva_orden' instrumento.id 'VENTA' %}" class="btn btn-outline-danger">Vender</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card card-metrica mb-3">
+    <div class="card-body">
+        {% if ultimo_precio %}
+        <p class="mb-0">Ultimo cierre: <strong>{{ ultimo_precio.cierre|floatformat:2 }} {{ instrumento.moneda }}</strong> ({{ ultimo_precio.fecha }})</p>
+        {% else %}
+        <p class="mb-0 text-muted">Aun no hay precios cargados para este instrumento.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card card-metrica">
+    <div class="card-body">
+        <div id="grafica-precio" style="height: 420px;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    var fechas = {{ fechas_json|safe }};
+    var cierres = {{ cierres_json|safe }};
+    Plotly.newPlot('grafica-precio', [{
+        x: fechas, y: cierres, type: 'scatter', mode: 'lines',
+        line: {color: '#0b2545'}, name: 'Cierre ajustado',
+    }], {
+        margin: {t: 20, r: 20, b: 40, l: 50},
+        xaxis: {title: 'Fecha'}, yaxis: {title: 'Precio ({{ instrumento.moneda }})'},
+    }, {displayModeBar: false, responsive: true});
+</script>
+{% endblock %}

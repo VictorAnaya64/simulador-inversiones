@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block titulo %}Analisis{% endblock %}
+{% block contenido %}
+<h1 class="h3 mb-3">Analisis de mi portafolio</h1>
+
+<div class="card card-metrica mb-3">
+    <div class="card-body">
+        <h2 class="h6">Metricas de desempeno por ventana</h2>
+        {% if metricas %}
+        <table class="table tabla-compacta mb-0">
+            <thead><tr><th>Ventana</th><th>Rend. acumulado</th><th>Volatilidad anual</th><th>Sharpe</th><th>Beta</th><th>Max drawdown</th><th>VaR 95%</th></tr></thead>
+            <tbody>
+                {% for m in metricas %}
+                <tr>
+                    <td>{{ m.get_ventana_display }}</td>
+                    {% if m.observaciones_insuficientes %}
+                        <td colspan="6" class="text-muted">Informacion insuficiente ({{ m.numero_observaciones }} observaciones).</td>
+                    {% else %}
+                        <td class="{% if m.rendimiento_acumulado >= 0 %}valor-positivo{% else %}valor-negativo{% endif %}">{{ m.rendimiento_acumulado|floatformat:4 }}</td>
+                        <td>{{ m.volatilidad_anualizada|floatformat:4|default:"N/D" }}</td>
+                        <td>{{ m.sharpe|floatformat:3|default:"N/D" }}</td>
+                        <td>{{ m.beta|floatformat:3|default:"N/D" }}</td>
+                        <td>{{ m.max_drawdown|floatformat:4|default:"N/D" }}</td>
+                        <td>{{ m.var_historico_95|floatformat:4|default:"N/D" }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted mb-0">Aun no hay suficiente historia para calcular metricas.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if tiene_benchmark %}
+<div class="card card-metrica mb-3">
+    <div class="card-body">
+        <h2 class="h6">Comparacion contra benchmark (base 100)</h2>
+        <div id="grafica-benchmark" style="height: 320px;"></div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <div class="card card-metrica h-100">
+            <div class="card-body">
+                <h2 class="h6">Matriz de correlacion (instrumentos del curso)</h2>
+                {% if correlacion_tickers_json != "[]" %}
+                <div id="grafica-correlacion" style="height: 380px;"></div>
+                {% else %}
+                <p class="text-muted mb-0">No hay suficiente historia comun para calcular correlaciones.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-metrica h-100">
+            <div class="card-body">
+                <h2 class="h6">Frontera eficiente de Markowitz</h2>
+                {% if frontera_json != "[]" %}
+                <div id="grafica-frontera" style="height: 380px;"></div>
+                {% else %}
+                <p class="text-muted mb-0">No hay suficiente historia comun para optimizar.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if optimo_min_var %}
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card card-metrica">
+            <div class="card-body">
+                <h2 class="h6">Portafolio de minima varianza</h2>
+                <p class="small text-muted mb-2">
+                    Rendimiento esperado anual: {{ optimo_min_var.rendimiento_esperado_anual|floatformat:4 }} &middot;
+                    Volatilidad anual: {{ optimo_min_var.volatilidad_anual|floatformat:4 }}
+                </p>
+                <table class="table table-sm mb-0">
+                    {% for ticker, peso in pesos_min_var %}
+                    <tr><td>{{ ticker }}</td><td>{{ peso|floatformat:3 }}</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-metrica">
+            <div class="card-body">
+                <h2 class="h6">Portafolio de maximo Sharpe</h2>
+                <p class="small text-muted mb-2">
+                    Rendimiento esperado anual: {{ optimo_max_sharpe.rendimiento_esperado_anual|floatformat:4 }} &middot;
+                    Volatilidad anual: {{ optimo_max_sharpe.volatilidad_anual|floatformat:4 }} &middot;
+                    Sharpe: {{ optimo_max_sharpe.sharpe|floatformat:3 }}
+                </p>
+                <table class="table table-sm mb-0">
+                    {% for ticker, peso in pesos_max_sharpe %}
+                    <tr><td>{{ ticker }}</td><td>{{ peso|floatformat:3 }}</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    {% if tiene_benchmark %}
+    Plotly.newPlot('grafica-benchmark', [
+        {x: {{ benchmark_fechas_json|safe }}, y: {{ portafolio_valores_norm_json|safe }}, type: 'scatter', mode: 'lines', name: 'Mi portafolio', line: {color: '#0b2545'}},
+        {x: {{ benchmark_fechas_json|safe }}, y: {{ benchmark_valores_json|safe }}, type: 'scatter', mode: 'lines', name: 'Benchmark', line: {color: '#6b7280', dash: 'dot'}},
+    ], {margin: {t: 10, r: 10, b: 30, l: 40}}, {displayModeBar: false, responsive: true});
+    {% endif %}
+
+    var tickersCorr = {{ correlacion_tickers_json|safe }};
+    var matrizCorr = {{ correlacion_matriz_json|safe }};
+    if (tickersCorr.length > 0) {
+        Plotly.newPlot('grafica-correlacion', [{
+            x: tickersCorr, y: tickersCorr, z: matrizCorr, type: 'heatmap',
+            colorscale: [[0, '#b3261e'], [0.5, '#f3f4f6'], [1, '#0f9d58']], zmin: -1, zmax: 1,
+        }], {margin: {t: 10, r: 10, b: 60, l: 60}}, {displayModeBar: false, responsive: true});
+    }
+
+    var frontera = {{ frontera_json|safe }};
+    if (frontera.length > 0) {
+        Plotly.newPlot('grafica-frontera', [{
+            x: frontera.map(function(p){return p.volatilidad;}),
+            y: frontera.map(function(p){return p.rendimiento;}),
+            type: 'scatter', mode: 'lines+markers', line: {color: '#13315c'}, name: 'Frontera eficiente',
+        }], {
+            margin: {t: 10, r: 10, b: 40, l: 50},
+            xaxis: {title: 'Volatilidad anual'}, yaxis: {title: 'Rendimiento esperado anual'},
+        }, {displayModeBar: false, responsive: true});
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,6 @@
+# Dependencias solo para desarrollo local / CI / pruebas de carga.
+# NO instalar en el hosting de produccion.
+-r requirements.txt
+pytest==9.2.0
+pytest-django==4.14.0
+locust==2.47.0
