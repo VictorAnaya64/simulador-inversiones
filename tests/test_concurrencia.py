@@ -29,18 +29,18 @@ from apps.portafolios.excepciones import EfectivoInsuficienteError
 
 @pytest.mark.django_db(transaction=True)
 def test_dos_compras_concurrentes_no_exceden_el_efectivo_disponible(
-    portafolio, instrumento_bmv, estudiante, fabrica_precio,
+    portafolio, instrumento_nyse, estudiante, fabrica_precio,
 ):
     hoy = timezone.localdate()
     # Precio tal que cada orden individualmente cabe en el capital, pero las dos juntas no.
-    fabrica_precio(instrumento_bmv, hoy, '700000.00')
+    fabrica_precio(instrumento_nyse, hoy, '700000.00')
 
     resultados = {}
 
     def intentar_compra(etiqueta, clave):
         try:
             crear_orden(
-                portafolio=portafolio, instrumento=instrumento_bmv, tipo=Orden.Tipo.COMPRA,
+                portafolio=portafolio, instrumento=instrumento_nyse, tipo=Orden.Tipo.COMPRA,
                 cantidad=1, usuario=estudiante, clave_idempotencia=clave,
             )
             resultados[etiqueta] = 'ok'
@@ -66,6 +66,6 @@ def test_dos_compras_concurrentes_no_exceden_el_efectivo_disponible(
     portafolio.refresh_from_db()
     # Invariante financiera central: lo reservado nunca excede el efectivo total,
     # y el disponible nunca queda negativo, sin importar cuantas ordenes tuvieron exito.
-    assert portafolio.efectivo_mxn_reservado == Decimal('700000.00') * len(exitosas)
-    assert portafolio.efectivo_disponible('MXN') >= Decimal('0.00')
+    assert portafolio.efectivo_reservado == Decimal('700000.00') * len(exitosas)
+    assert portafolio.efectivo_disponible() >= Decimal('0.00')
     assert Orden.objects.count() == len(exitosas)

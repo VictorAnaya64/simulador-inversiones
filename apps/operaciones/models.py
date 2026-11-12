@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from apps.mercados.models import Instrumento, Moneda
+from apps.mercados.models import Instrumento
 from apps.portafolios.models import Portafolio
 
 
@@ -34,7 +34,6 @@ class Orden(models.Model):
     instrumento = models.ForeignKey(Instrumento, on_delete=models.PROTECT, related_name='ordenes')
     tipo = models.CharField(max_length=6, choices=Tipo.choices)
     cantidad = models.DecimalField(max_digits=18, decimal_places=4, validators=[MinValueValidator(Decimal('0.0001'))])
-    moneda = models.CharField(max_length=3, choices=Moneda.choices)
     estado = models.CharField(max_length=10, choices=Estado.choices, default=Estado.PENDIENTE)
     clave_idempotencia = models.CharField(max_length=80, unique=True)
     precio_referencia = models.DecimalField(

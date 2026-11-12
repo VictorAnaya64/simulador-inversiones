@@ -7,10 +7,8 @@
     <div class="col-md-6">
         <div class="card card-metrica mb-3">
             <div class="card-body">
-                <p class="mb-1">Efectivo disponible en {{ instrumento.moneda }}:
-                    <strong>
-                    {% if instrumento.moneda == 'MXN' %}{{ portafolio.efectivo_mxn|floatformat:2 }}{% else %}{{ portafolio.efectivo_usd|floatformat:2 }}{% endif %}
-                    </strong>
+                <p class="mb-1">Efectivo disponible (USD):
+                    <strong>{{ portafolio.efectivo_disponible|floatformat:2 }}</strong>
                 </p>
                 {% if posicion %}
                 <p class="mb-0">Titulos disponibles para vender: <strong>{{ posicion.cantidad_disponible|floatformat:0 }}</strong></p>

@@ -26,7 +26,7 @@
                     <td>{{ curso.nombre }}</td>
                     <td>{{ curso.fecha_inicio }}</td>
                     <td>{{ curso.fecha_fin }}</td>
-                    <td>${{ curso.capital_inicial_mxn|floatformat:2 }}</td>
+                    <td>${{ curso.capital_inicial_usd|floatformat:2 }} USD</td>
                     <td>{{ curso.num_estudiantes }}</td>
                     <td>
                         {% if curso.operaciones_activas %}

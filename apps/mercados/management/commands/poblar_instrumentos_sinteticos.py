@@ -7,9 +7,9 @@ from apps.mercados.proveedores.sintetico import BENCHMARKS_SINTETICOS, UNIVERSO_
 
 class Command(BaseCommand):
     help = (
-        'Crea (si no existen) el proveedor SINTETICO y los 20 instrumentos de '
-        'demostracion + 2 indices de referencia. Idempotente: se puede correr '
-        'varias veces sin duplicar registros.'
+        'Crea (si no existen) el proveedor SINTETICO y los 10 instrumentos de '
+        'demostracion (NYSE/NASDAQ, en USD) + 1 indice de referencia. '
+        'Idempotente: se puede correr varias veces sin duplicar registros.'
     )
 
     @transaction.atomic
@@ -27,11 +27,11 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Proveedor creado: {proveedor.nombre}'))
 
         total_creados = 0
-        for ticker, nombre, bolsa, moneda, tipo, pais, *_resto in UNIVERSO_SINTETICO + BENCHMARKS_SINTETICOS:
+        for ticker, nombre, bolsa, tipo, pais, *_resto in UNIVERSO_SINTETICO + BENCHMARKS_SINTETICOS:
             _, creado = Instrumento.objects.get_or_create(
                 ticker=ticker, bolsa=bolsa,
                 defaults={
-                    'nombre': nombre, 'moneda': moneda, 'tipo_instrumento': tipo,
+                    'nombre': nombre, 'tipo_instrumento': tipo,
                     'pais': pais, 'fuente_datos': proveedor, 'activo': True,
                 },
             )

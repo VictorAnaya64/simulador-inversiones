@@ -12,7 +12,7 @@ from apps.portafolios.models import ValuacionPortafolio
 def _crear_valuaciones(portafolio, dias, rendimiento_diario_constante):
     """Crea una serie de valuaciones con un rendimiento diario constante conocido, para poder predecir las metricas."""
     hoy = timezone.localdate()
-    valor = portafolio.inscripcion.curso.capital_inicial_mxn
+    valor = portafolio.inscripcion.curso.capital_inicial_usd
     valuaciones = []
     for offset in range(dias, -1, -1):
         fecha = hoy - timedelta(days=offset)
@@ -20,11 +20,9 @@ def _crear_valuaciones(portafolio, dias, rendimiento_diario_constante):
             valor = valor * (Decimal('1') + rendimiento_diario_constante)
         valuaciones.append(ValuacionPortafolio(
             portafolio=portafolio, fecha=fecha,
-            valor_efectivo_mxn=valor, valor_efectivo_usd_en_mxn=Decimal('0'),
-            valor_posiciones_mxn=Decimal('0'), valor_total_mxn=valor,
-            tipo_cambio_usado=Decimal('18.0'),
+            valor_efectivo=valor, valor_posiciones=Decimal('0'), valor_total=valor,
             rendimiento_diario=None if offset == dias else rendimiento_diario_constante,
-            rendimiento_acumulado=(valor / portafolio.inscripcion.curso.capital_inicial_mxn) - 1,
+            rendimiento_acumulado=(valor / portafolio.inscripcion.curso.capital_inicial_usd) - 1,
         ))
     ValuacionPortafolio.objects.bulk_create(valuaciones)
 

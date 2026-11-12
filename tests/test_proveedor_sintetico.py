@@ -15,14 +15,14 @@ class _InstrumentoFalso:
         self.ticker = ticker
 
 
-def test_universo_tiene_al_menos_20_instrumentos():
-    assert len(UNIVERSO_SINTETICO) >= 20
+def test_universo_tiene_al_menos_10_instrumentos():
+    assert len(UNIVERSO_SINTETICO) >= 10
 
 
 def test_misma_semilla_genera_los_mismos_precios():
     proveedor1 = ProveedorSintetico(semilla=42)
     proveedor2 = ProveedorSintetico(semilla=42)
-    instrumento = _InstrumentoFalso('SBMV01')
+    instrumento = _InstrumentoFalso('STEC01')
 
     precios1 = proveedor1.obtener_precios_historicos(instrumento, date(2023, 1, 1), date(2023, 3, 1))
     precios2 = proveedor2.obtener_precios_historicos(instrumento, date(2023, 1, 1), date(2023, 3, 1))
@@ -38,7 +38,7 @@ def test_misma_semilla_genera_los_mismos_precios():
 def test_semillas_distintas_generan_precios_distintos():
     proveedor1 = ProveedorSintetico(semilla=1)
     proveedor2 = ProveedorSintetico(semilla=2)
-    instrumento = _InstrumentoFalso('SBMV01')
+    instrumento = _InstrumentoFalso('STEC01')
 
     precios1 = proveedor1.obtener_precios_historicos(instrumento, date(2023, 1, 1), date(2023, 6, 1))
     precios2 = proveedor2.obtener_precios_historicos(instrumento, date(2023, 1, 1), date(2023, 6, 1))
@@ -60,7 +60,7 @@ def test_split_genera_caida_visible_en_precio_crudo_pero_no_en_ajustado():
     proveedor = ProveedorSintetico(semilla=42)
     ticker_con_split = next(
         t[0] for i, t in enumerate(UNIVERSO_SINTETICO)
-        if t[4] == 'ACCION' and i % 7 == 0
+        if t[3] == 'ACCION' and i % 7 == 0
     )
     instrumento = _InstrumentoFalso(ticker_con_split)
     eventos = proveedor.obtener_eventos_corporativos(instrumento, FECHA_INICIO_UNIVERSO, FECHA_FIN_UNIVERSO)

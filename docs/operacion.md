@@ -7,15 +7,14 @@ un reintento de Cron) nunca duplica datos ni reprocesa lo ya hecho.
 
 | Comando | Que hace | Cuando correrlo |
 |---|---|---|
-| `poblar_instrumentos_sinteticos` | Crea el proveedor SINTETICO y los 20 instrumentos + 2 indices de demostracion | Una vez, al preparar el ambiente |
-| `cargar_calendario_festivos` | Carga un calendario **aproximado** de dias inhabiles BMV/NYSE/NASDAQ 2022-2028 | Una vez, y revisar/corregir cada semestre |
+| `poblar_instrumentos_sinteticos` | Crea el proveedor SINTETICO y los 10 instrumentos NYSE/NASDAQ + 1 indice de demostracion | Una vez, al preparar el ambiente |
+| `cargar_calendario_festivos` | Carga un calendario **aproximado** de dias inhabiles NYSE/NASDAQ 2022-2028 | Una vez, y revisar/corregir cada semestre |
 | `importar_precios [--desde] [--hasta]` | Descarga (del proveedor activo) y guarda precios + eventos corporativos | Diario, antes de `procesar_ordenes` |
-| `actualizar_tipo_cambio [--desde] [--hasta]` | Descarga y guarda el tipo de cambio USD/MXN | Diario, antes de `calcular_valuaciones` |
 | `aplicar_eventos_corporativos` | Aplica splits/dividendos vencidos a las posiciones | Diario, antes de `procesar_ordenes` |
 | `procesar_ordenes` | Ejecuta o rechaza ordenes pendientes cuya sesion ya llego | Diario (se puede correr varias veces al dia sin riesgo) |
 | `calcular_valuaciones [--fecha] [--desde --hasta]` | Precalcula la valuacion diaria de cada portafolio | Diario, despues de `procesar_ordenes` |
 | `calcular_metricas [--fecha]` | Precalcula rendimiento/riesgo/desempeno por ventana | Diario, despues de `calcular_valuaciones` |
-| `poblar_datos_demo [--hasta]` | Orquesta los primeros 5 comandos de esta tabla para un ambiente de demostracion | Al preparar un ambiente nuevo |
+| `poblar_datos_demo [--hasta]` | Orquesta los primeros 4 comandos de esta tabla para un ambiente de demostracion | Al preparar un ambiente nuevo |
 | `crear_curso_demo [--n-estudiantes] [--password]` | Crea profesor, N estudiantes y un curso ya inscrito | Al preparar un ambiente de prueba |
 
 Ver `docs/despliegue_cpanel.md` seccion 13 para el orden exacto y los
@@ -33,8 +32,7 @@ desde `manage.py shell`:
 from apps.portafolios.models import Portafolio
 from django.db.models import F
 # Ningun portafolio deberia tener efectivo reservado mayor al efectivo total.
-list(Portafolio.objects.filter(efectivo_mxn_reservado__gt=F('efectivo_mxn')))
-list(Portafolio.objects.filter(efectivo_usd_reservado__gt=F('efectivo_usd')))
+list(Portafolio.objects.filter(efectivo_reservado__gt=F('efectivo')))
 ```
 
 Si esas consultas devuelven algo, es un bug: reportarlo con el id del
@@ -78,7 +76,7 @@ que el sistema "soporta 100 usuarios".
   Redis/Memcached.
 - **Calendario de festivos**: `cargar_calendario_festivos` genera un
   calendario *aproximado* (reglas generales + Viernes Santo calculado),
-  no una fuente oficial. Revisar contra BMV y NYSE/NASDAQ antes de cada
+  no una fuente oficial. Revisar contra NYSE/NASDAQ antes de cada
   semestre; no modela cierres anticipados.
 - **Adaptadores EODHD/Twelve Data**: sin implementar (ver
   `docs/despliegue_cpanel.md`, seccion final).

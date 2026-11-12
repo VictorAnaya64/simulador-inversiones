@@ -41,7 +41,7 @@ def curso(db, profesor):
         profesor=profesor,
         fecha_inicio=hoy - timedelta(days=10),
         fecha_fin=hoy + timedelta(days=100),
-        capital_inicial_mxn=Decimal('1000000.00'),
+        capital_inicial_usd=Decimal('1000000.00'),
         comision_operacion=Decimal('0'),
     )
 
@@ -61,11 +61,11 @@ def portafolio(db, inscripcion):
 
 
 @pytest.fixture
-def instrumento_bmv(db, proveedor_sintetico):
+def instrumento_nyse(db, proveedor_sintetico):
     from apps.mercados.models import Instrumento
     return Instrumento.objects.create(
-        ticker='DEMO1', nombre='Demo BMV 1', bolsa='BMV', moneda='MXN',
-        tipo_instrumento='ACCION', pais='Mexico', fuente_datos=proveedor_sintetico,
+        ticker='DEMO1', nombre='Demo NYSE 1', bolsa='NYSE',
+        tipo_instrumento='ACCION', pais='Estados Unidos', fuente_datos=proveedor_sintetico,
     )
 
 
@@ -73,7 +73,7 @@ def instrumento_bmv(db, proveedor_sintetico):
 def instrumento_nasdaq(db, proveedor_sintetico):
     from apps.mercados.models import Instrumento
     return Instrumento.objects.create(
-        ticker='DEMO2', nombre='Demo NASDAQ 1', bolsa='NASDAQ', moneda='USD',
+        ticker='DEMO2', nombre='Demo NASDAQ 1', bolsa='NASDAQ',
         tipo_instrumento='ACCION', pais='Estados Unidos', fuente_datos=proveedor_sintetico,
     )
 

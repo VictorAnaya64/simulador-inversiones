@@ -8,16 +8,16 @@ el administrador. Llegaras automaticamente a **Mis cursos**.
 ## Crear un curso
 
 1. En **Mis cursos**, boton **Crear curso**.
-2. Completa nombre, fechas de inicio/fin, capital inicial, tasa libre
-   de riesgo anual, spread de conversion de divisas y comision por
-   operacion (puedes dejar los valores por defecto si no tienes una
-   preferencia especifica).
-3. En **Instrumentos permitidos**, selecciona que acciones/ETF pueden
-   operar tus estudiantes. Si no seleccionas ninguno, se permiten
-   **todos** los instrumentos activos del catalogo.
-4. En **Benchmark principal**, elige un indice (por ejemplo "Indice
-   Sintetico BMV" o "Indice Sintetico EUA") contra el cual se
-   compararan los portafolios de tus estudiantes.
+2. Completa nombre, fechas de inicio/fin, capital inicial (en USD),
+   tasa libre de riesgo anual y comision por operacion (puedes dejar
+   los valores por defecto si no tienes una preferencia especifica).
+3. En **Instrumentos permitidos**, selecciona que acciones/ETF (todos
+   listados en NYSE/NASDAQ, en USD) pueden operar tus estudiantes. Si
+   no seleccionas ninguno, se permiten **todos** los instrumentos
+   activos del catalogo.
+4. En **Benchmark principal**, elige el "Indice Sintetico EUA" (o el
+   indice que corresponda) contra el cual se compararan los
+   portafolios de tus estudiantes.
 5. Guarda. El curso queda con operaciones activas por defecto.
 
 ## Dar de alta estudiantes

@@ -81,7 +81,7 @@ def analisis(request):
                 instrumento=curso.benchmark_principal, fecha__gte=valuaciones[0].fecha, fecha__lte=valuaciones[-1].fecha,
             )
         }
-        primer_valor_portafolio = float(valuaciones[0].valor_total_mxn)
+        primer_valor_portafolio = float(valuaciones[0].valor_total)
         primer_precio_benchmark = None
         for v in valuaciones:
             precio_b = precios_benchmark.get(v.fecha)
@@ -91,7 +91,7 @@ def analisis(request):
                 primer_precio_benchmark = precio_b
             benchmark_fechas.append(v.fecha.isoformat())
             benchmark_valores.append(100 * precio_b / primer_precio_benchmark)
-            portafolio_valores_norm.append(100 * float(v.valor_total_mxn) / primer_valor_portafolio)
+            portafolio_valores_norm.append(100 * float(v.valor_total) / primer_valor_portafolio)
 
     tickers_optimizacion = [i.ticker for i in instrumentos]
     pesos_min_var = list(zip(tickers_optimizacion, optimo_min_var['pesos'])) if optimo_min_var else []

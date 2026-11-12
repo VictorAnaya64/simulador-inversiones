@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
         <h1 class="h3 mb-1">{{ curso.nombre }}</h1>
-        <p class="text-muted mb-0">{{ curso.fecha_inicio }} &rarr; {{ curso.fecha_fin }} &middot; Capital inicial: ${{ curso.capital_inicial_mxn|floatformat:2 }}</p>
+        <p class="text-muted mb-0">{{ curso.fecha_inicio }} &rarr; {{ curso.fecha_fin }} &middot; Capital inicial: ${{ curso.capital_inicial_usd|floatformat:2 }} USD</p>
     </div>
     <div class="text-end">
         <a href="{% url 'cursos:alta_estudiantes' curso.id %}" class="btn btn-primary btn-sm">Dar de alta estudiantes</a>
@@ -42,7 +42,7 @@
                     <td>{{ fila.estudiante.get_full_name|default:fila.estudiante.username }}</td>
                     <td>
                         {% if fila.portafolio %}
-                            ${{ fila.portafolio.efectivo_mxn|floatformat:2 }} (efectivo)
+                            ${{ fila.portafolio.efectivo|floatformat:2 }} (efectivo)
                         {% else %}
                             <span class="text-muted">Sin portafolio</span>
                         {% endif %}

@@ -1,6 +1,24 @@
 # Estado del proyecto
 
-_Ultima actualizacion: 2026-11-07._
+_Ultima actualizacion: 2026-11-08._
+
+## Cambio posterior a la primera version (2026-11-08)
+
+Por decision explicita del profesor, se elimino el soporte de BMV y de
+multiples divisas: **todos los instrumentos cotizan en NYSE/NASDAQ y
+toda la plataforma opera en una sola divisa (USD)**. Se removieron los
+modelos `TipoCambio` y `ConversionDivisa`, los campos `moneda` de
+`Instrumento`/`Orden`/`MovimientoEfectivo`, el formulario y la vista de
+conversion de divisas, el comando `actualizar_tipo_cambio`, y los 10
+instrumentos sinteticos de BMV (quedan 10 instrumentos NYSE/NASDAQ + 1
+indice). `Curso.capital_inicial_mxn` se renombro a
+`Curso.capital_inicial_usd`; `Portafolio.efectivo_mxn/efectivo_usd` se
+consolidaron en un unico `Portafolio.efectivo`. Las migraciones de
+`mercados`, `cursos`, `portafolios`, `operaciones` y `analitica` se
+regeneraron desde cero (se perdio cualquier dato de demostracion local
+previo; no habia datos reales de estudiantes). 47 pruebas pasan tras el
+cambio (antes 51; se eliminaron las 4 de `tests/test_divisas.py`, que
+probaban la funcionalidad removida).
 
 ## Resumen
 
@@ -20,14 +38,15 @@ de codigo.
   modelo. ✅
 - **Fase 2 — Motor financiero**: ordenes, ejecuciones a precio de
   cierre T+1 bursatil, reservas de efectivo/titulos, idempotencia,
-  costeo FIFO, movimientos de efectivo, conversion de divisas,
-  splits/dividendos. ✅ (23+ pruebas dedicadas)
-- **Fase 3 — Datos bursatiles**: proveedor sintetico reproducible (20
-  instrumentos + 2 indices, 6 anios de historia, correlaciones,
-  splits/dividendos de ejemplo, tipo de cambio simulado), adaptador
-  patron para proveedores reales (EODHD/Twelve Data, sin implementar
-  a proposito — ver `docs/despliegue_cpanel.md`), comandos de
-  importacion idempotentes, calendario bursatil aproximado. ✅
+  costeo FIFO, movimientos de efectivo, splits/dividendos. Toda la
+  plataforma opera en una sola divisa (USD); no hay conversion de
+  divisas. ✅ (19+ pruebas dedicadas)
+- **Fase 3 — Datos bursatiles**: proveedor sintetico reproducible (10
+  instrumentos NYSE/NASDAQ + 1 indice, 6 anios de historia,
+  correlaciones, splits/dividendos de ejemplo), adaptador patron para
+  proveedores reales (EODHD/Twelve Data, sin implementar a proposito —
+  ver `docs/despliegue_cpanel.md`), comandos de importacion
+  idempotentes, calendario bursatil aproximado (NYSE/NASDAQ). ✅
 - **Fase 4 — Aplicacion web**: login con bloqueo por intentos
   fallidos, dashboard de estudiante (Plotly: evolucion + distribucion),
   buscador y detalle de instrumentos, formulario de compra/venta con
@@ -40,7 +59,7 @@ de codigo.
   Markowitz (minima varianza, maximo Sharpe, frontera eficiente),
   comparacion contra benchmark. ✅ (16 pruebas dedicadas a las
   formulas + pruebas de integracion del comando `calcular_metricas`)
-- **Fase 6 — Calidad y despliegue**: 51 pruebas automatizadas (pytest,
+- **Fase 6 — Calidad y despliegue**: 47 pruebas automatizadas (pytest,
   todas pasando), documentacion completa en `docs/`, `locustfile.py`
   preparado (no ejecutado contra un hosting real todavia),
   `passenger_wsgi.py`, variables de entorno documentadas en
@@ -50,16 +69,16 @@ de codigo.
 
 ```
 pytest
-51 passed
+47 passed
 ```
 
 Cobertura: calendario bursatil, motor de ordenes (creacion, validacion,
 idempotencia, cancelacion, ejecucion, rechazo por movimiento de precio,
 reprocesamiento, FIFO), concurrencia (dos compras simultaneas sobre el
-mismo saldo), conversion de divisas, eventos corporativos (splits y
-dividendos, incluyendo no-reprocesamiento), proveedor sintetico
-(reproducibilidad, universo, splits), analitica (todas las formulas +
-optimizacion de Markowitz), comando `calcular_metricas` end-to-end.
+mismo saldo), eventos corporativos (splits y dividendos, incluyendo
+no-reprocesamiento), proveedor sintetico (reproducibilidad, universo,
+splits), analitica (todas las formulas + optimizacion de Markowitz),
+comando `calcular_metricas` end-to-end.
 
 **No cubierto todavia por pruebas automatizadas** (verificado
 manualmente via `Client` de Django, ver mas abajo): vistas web
@@ -96,7 +115,7 @@ un navegador antes de la prueba piloto.
    los objetivos de P95 en `docs/operacion.md` son metas, no
    resultados medidos.
 3. **Calendario de festivos**: revisar/corregir
-   `cargar_calendario_festivos` contra las fuentes oficiales de BMV y
+   `cargar_calendario_festivos` contra las fuentes oficiales de
    NYSE/NASDAQ antes de cada semestre (es una aproximacion).
 4. **Adaptadores EODHD / Twelve Data**: implementar solo si se decide
    usar datos de mercado reales; requiere verificar la documentacion

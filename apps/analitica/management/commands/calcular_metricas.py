@@ -87,7 +87,7 @@ class Command(BaseCommand):
             ).order_by('fecha')
         )
 
-        valores_totales = [float(v.valor_total_mxn) for v in valuaciones]
+        valores_totales = [float(v.valor_total) for v in valuaciones]
         serie_rendimientos, fechas_rendimientos = [], []
         for v in valuaciones:
             if v.rendimiento_diario is not None:

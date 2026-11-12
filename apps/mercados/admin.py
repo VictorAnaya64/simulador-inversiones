@@ -6,7 +6,6 @@ from .models import (
     Instrumento,
     PrecioMercado,
     ProveedorDatosMercado,
-    TipoCambio,
 )
 
 
@@ -18,8 +17,8 @@ class ProveedorDatosMercadoAdmin(admin.ModelAdmin):
 
 @admin.register(Instrumento)
 class InstrumentoAdmin(admin.ModelAdmin):
-    list_display = ('ticker', 'bolsa', 'nombre', 'moneda', 'tipo_instrumento', 'pais', 'activo')
-    list_filter = ('bolsa', 'moneda', 'tipo_instrumento', 'activo')
+    list_display = ('ticker', 'bolsa', 'nombre', 'tipo_instrumento', 'pais', 'activo')
+    list_filter = ('bolsa', 'tipo_instrumento', 'activo')
     search_fields = ('ticker', 'nombre')
 
 
@@ -28,12 +27,6 @@ class PrecioMercadoAdmin(admin.ModelAdmin):
     list_display = ('instrumento', 'fecha', 'cierre', 'cierre_ajustado', 'volumen', 'fuente')
     list_filter = ('fuente',)
     search_fields = ('instrumento__ticker',)
-    date_hierarchy = 'fecha'
-
-
-@admin.register(TipoCambio)
-class TipoCambioAdmin(admin.ModelAdmin):
-    list_display = ('par', 'fecha', 'valor', 'fuente')
     date_hierarchy = 'fecha'
 
 

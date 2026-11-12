@@ -12,7 +12,7 @@ from apps.usuarios.models import RegistroAuditoria
 from apps.usuarios.services import registrar_auditoria
 
 ENCABEZADOS = [
-    'Estudiante', 'Usuario', 'Matricula', 'Efectivo MXN', 'Efectivo USD',
+    'Estudiante', 'Usuario', 'Matricula', 'Efectivo (USD)',
     'Rendimiento acumulado', 'Volatilidad anualizada', 'Sharpe', 'Max drawdown', 'Numero de operaciones',
 ]
 
@@ -36,8 +36,7 @@ def _filas_curso(curso):
             inscripcion.estudiante.get_full_name() or inscripcion.estudiante.username,
             inscripcion.estudiante.username,
             inscripcion.estudiante.matricula,
-            float(portafolio.efectivo_mxn) if portafolio else None,
-            float(portafolio.efectivo_usd) if portafolio else None,
+            float(portafolio.efectivo) if portafolio else None,
             float(metrica.rendimiento_acumulado) if metrica and metrica.rendimiento_acumulado is not None else None,
             float(metrica.volatilidad_anualizada) if metrica and metrica.volatilidad_anualizada is not None else None,
             float(metrica.sharpe) if metrica and metrica.sharpe is not None else None,

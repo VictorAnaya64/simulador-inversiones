@@ -5,12 +5,6 @@ from django.db import models
 class Bolsa(models.TextChoices):
     NYSE = 'NYSE', 'New York Stock Exchange'
     NASDAQ = 'NASDAQ', 'NASDAQ'
-    BMV = 'BMV', 'Bolsa Mexicana de Valores'
-
-
-class Moneda(models.TextChoices):
-    MXN = 'MXN', 'Peso mexicano'
-    USD = 'USD', 'Dolar estadounidense'
 
 
 class TipoInstrumento(models.TextChoices):
@@ -61,7 +55,6 @@ class Instrumento(models.Model):
     ticker = models.CharField(max_length=15)
     nombre = models.CharField(max_length=150)
     bolsa = models.CharField(max_length=10, choices=Bolsa.choices)
-    moneda = models.CharField(max_length=3, choices=Moneda.choices)
     tipo_instrumento = models.CharField(max_length=10, choices=TipoInstrumento.choices)
     pais = models.CharField(max_length=60)
     activo = models.BooleanField(default=True)
@@ -129,31 +122,6 @@ class PrecioMercado(models.Model):
         return f'{self.instrumento.ticker} {self.fecha} close={self.cierre}'
 
 
-class TipoCambio(models.Model):
-    """Tipo de cambio diario. Por ahora solo se modela el par USD/MXN."""
-
-    class Par(models.TextChoices):
-        USDMXN = 'USDMXN', 'USD/MXN'
-
-    par = models.CharField(max_length=10, choices=Par.choices, default=Par.USDMXN)
-    fecha = models.DateField()
-    valor = models.DecimalField(max_digits=12, decimal_places=6, help_text='Unidades de MXN por 1 USD.')
-    fuente = models.CharField(max_length=20)
-    fecha_actualizacion = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = 'tipo de cambio'
-        verbose_name_plural = 'tipos de cambio'
-        constraints = [
-            models.UniqueConstraint(fields=['par', 'fecha'], name='uniq_tipocambio_par_fecha'),
-        ]
-        indexes = [models.Index(fields=['par', '-fecha'])]
-        ordering = ['fecha']
-
-    def __str__(self):
-        return f'{self.par} {self.fecha} = {self.valor}'
-
-
 class EventoCorporativo(models.Model):
     """
     Split o dividendo de un instrumento. El campo `aplicado` evita que un
@@ -174,7 +142,7 @@ class EventoCorporativo(models.Model):
     )
     monto_dividendo_por_titulo = models.DecimalField(
         max_digits=18, decimal_places=6, null=True, blank=True,
-        help_text='Para dividendos: monto por titulo en la moneda de cotizacion del instrumento.',
+        help_text='Para dividendos: monto por titulo en USD.',
     )
     aplicado = models.BooleanField(default=False)
     fecha_aplicacion = models.DateTimeField(null=True, blank=True)

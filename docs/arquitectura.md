@@ -55,7 +55,7 @@ crear un import circular en tiempo de carga.
 ## Patron adaptador para datos de mercado
 
 `apps/mercados/proveedores/` define `ProveedorCotizacionesBase` (precios
-historicos, eventos corporativos, tipo de cambio) y una fabrica
+historicos y eventos corporativos) y una fabrica
 (`factory.obtener_proveedor_activo()`) que lee la configuracion
 `SIMULADOR['PROVEEDOR_DATOS_MERCADO']` y devuelve la implementacion
 concreta: `ProveedorSintetico` (por defecto, no requiere API externa),

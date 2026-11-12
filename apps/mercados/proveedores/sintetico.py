@@ -1,13 +1,14 @@
 """
 Proveedor de datos sinteticos. Permite que todo el sistema funcione sin
 contratar ni configurar ninguna API financiera real. Genera un universo
-fijo de 20 instrumentos (10 BMV en MXN, 10 NYSE/NASDAQ en USD) mas 2
-indices de referencia, con precios diarios desde 2022-01-03 hasta
+fijo de 10 instrumentos listados en NYSE/NASDAQ (todos cotizados en
+USD; la plataforma no modela otras divisas ni otras bolsas) mas 1
+indice de referencia, con precios diarios desde 2022-01-03 hasta
 2027-12-31, correlaciones realistas entre instrumentos (modelo de un
-factor global + un factor por mercado + ruido idiosincratico),
-distintos niveles de volatilidad, algunos splits y dividendos de
-ejemplo, y tipo de cambio USD/MXN simulado. Todo es reproducible: la
-misma semilla siempre genera exactamente los mismos datos.
+factor global + un factor de mercado + ruido idiosincratico),
+distintos niveles de volatilidad, y algunos splits y dividendos de
+ejemplo. Todo es reproducible: la misma semilla siempre genera
+exactamente los mismos datos.
 
 Simplificacion documentada (ver docs/reglas_financieras.md): los
 dividendos no provocan una caida mecanica del precio crudo en la
@@ -27,43 +28,27 @@ FECHA_INICIO_UNIVERSO = date(2022, 1, 3)
 FECHA_FIN_UNIVERSO = date(2027, 12, 31)
 DIAS_POR_ANIO = 252
 
-# ticker, nombre, bolsa, moneda, tipo, pais, precio_inicial, drift_anual, sigma_anual, beta_mercado
+# ticker, nombre, bolsa, tipo, pais, precio_inicial, drift_anual, sigma_anual, beta_mercado
 UNIVERSO_SINTETICO = [
-    ('SBMV01', 'Industrias Sintetico S.A.', 'BMV', 'MXN', 'ACCION', 'Mexico', 50.0, 0.10, 0.28, 0.75),
-    ('SBMV02', 'Consumo Sintetico S.A.', 'BMV', 'MXN', 'ACCION', 'Mexico', 35.0, 0.08, 0.24, 0.65),
-    ('SBMV03', 'Financiero Sintetico S.A.', 'BMV', 'MXN', 'ACCION', 'Mexico', 80.0, 0.09, 0.30, 0.85),
-    ('SBMV04', 'Materiales Sintetico S.A.', 'BMV', 'MXN', 'ACCION', 'Mexico', 120.0, 0.07, 0.26, 0.70),
-    ('SBMV05', 'Telecom Sintetico S.A.', 'BMV', 'MXN', 'ACCION', 'Mexico', 25.0, 0.06, 0.22, 0.55),
-    ('SBMV06', 'Energia Sintetico S.A.', 'BMV', 'MXN', 'ACCION', 'Mexico', 60.0, 0.11, 0.35, 0.80),
-    ('SBMV07', 'Salud Sintetico S.A.', 'BMV', 'MXN', 'ACCION', 'Mexico', 90.0, 0.09, 0.27, 0.60),
-    ('SBMV08', 'Infraestructura Sintetico S.A.', 'BMV', 'MXN', 'ACCION', 'Mexico', 45.0, 0.08, 0.25, 0.68),
-    ('SETFMX1', 'ETF Sintetico Mexico Amplio', 'BMV', 'MXN', 'ETF', 'Mexico', 100.0, 0.08, 0.16, 0.95),
-    ('SETFMX2', 'ETF Sintetico Mexico Dividendos', 'BMV', 'MXN', 'ETF', 'Mexico', 55.0, 0.07, 0.14, 0.90),
-    ('STEC01', 'Tecnologia Sintetico Inc.', 'NASDAQ', 'USD', 'ACCION', 'Estados Unidos', 150.0, 0.14, 0.38, 0.85),
-    ('STEC02', 'Software Sintetico Inc.', 'NASDAQ', 'USD', 'ACCION', 'Estados Unidos', 95.0, 0.12, 0.34, 0.80),
-    ('SBIO01', 'Biotecnologia Sintetico Inc.', 'NASDAQ', 'USD', 'ACCION', 'Estados Unidos', 40.0, 0.10, 0.45, 0.50),
-    ('SCON01', 'Consumo Sintetico Corp.', 'NYSE', 'USD', 'ACCION', 'Estados Unidos', 70.0, 0.08, 0.22, 0.65),
-    ('SIND01', 'Industrial Sintetico Corp.', 'NYSE', 'USD', 'ACCION', 'Estados Unidos', 110.0, 0.07, 0.24, 0.70),
-    ('SFIN01', 'Financiero Sintetico Corp.', 'NYSE', 'USD', 'ACCION', 'Estados Unidos', 130.0, 0.09, 0.28, 0.85),
-    ('SENE01', 'Energia Sintetico Corp.', 'NYSE', 'USD', 'ACCION', 'Estados Unidos', 85.0, 0.08, 0.32, 0.75),
-    ('SMAT01', 'Materiales Sintetico Corp.', 'NYSE', 'USD', 'ACCION', 'Estados Unidos', 55.0, 0.06, 0.26, 0.60),
-    ('SETFUS1', 'ETF Sintetico S&P Amplio', 'NYSE', 'USD', 'ETF', 'Estados Unidos', 400.0, 0.10, 0.17, 0.98),
-    ('SETFUS2', 'ETF Sintetico Nasdaq 100', 'NASDAQ', 'USD', 'ETF', 'Estados Unidos', 350.0, 0.13, 0.20, 0.95),
+    ('STEC01', 'Tecnologia Sintetico Inc.', 'NASDAQ', 'ACCION', 'Estados Unidos', 150.0, 0.14, 0.38, 0.85),
+    ('STEC02', 'Software Sintetico Inc.', 'NASDAQ', 'ACCION', 'Estados Unidos', 95.0, 0.12, 0.34, 0.80),
+    ('SBIO01', 'Biotecnologia Sintetico Inc.', 'NASDAQ', 'ACCION', 'Estados Unidos', 40.0, 0.10, 0.45, 0.50),
+    ('SCON01', 'Consumo Sintetico Corp.', 'NYSE', 'ACCION', 'Estados Unidos', 70.0, 0.08, 0.22, 0.65),
+    ('SIND01', 'Industrial Sintetico Corp.', 'NYSE', 'ACCION', 'Estados Unidos', 110.0, 0.07, 0.24, 0.70),
+    ('SFIN01', 'Financiero Sintetico Corp.', 'NYSE', 'ACCION', 'Estados Unidos', 130.0, 0.09, 0.28, 0.85),
+    ('SENE01', 'Energia Sintetico Corp.', 'NYSE', 'ACCION', 'Estados Unidos', 85.0, 0.08, 0.32, 0.75),
+    ('SMAT01', 'Materiales Sintetico Corp.', 'NYSE', 'ACCION', 'Estados Unidos', 55.0, 0.06, 0.26, 0.60),
+    ('SETFUS1', 'ETF Sintetico S&P Amplio', 'NYSE', 'ETF', 'Estados Unidos', 400.0, 0.10, 0.17, 0.98),
+    ('SETFUS2', 'ETF Sintetico Nasdaq 100', 'NASDAQ', 'ETF', 'Estados Unidos', 350.0, 0.13, 0.20, 0.95),
 ]
 
 BENCHMARKS_SINTETICOS = [
-    ('SIDXBMV', 'Indice Sintetico BMV', 'BMV', 'MXN', 'INDICE', 'Mexico', 1000.0, 0.08, 0.16, 1.0),
-    ('SIDXUS', 'Indice Sintetico EUA', 'NASDAQ', 'USD', 'INDICE', 'Estados Unidos', 1000.0, 0.10, 0.17, 1.0),
+    ('SIDXUS', 'Indice Sintetico EUA', 'NASDAQ', 'INDICE', 'Estados Unidos', 1000.0, 0.10, 0.17, 1.0),
 ]
 
 SIGMA_GLOBAL_ANUAL = 0.08
-SIGMA_BMV_ANUAL = 0.16
-SIGMA_US_ANUAL = 0.18
+SIGMA_MERCADO_ANUAL = 0.18
 BETA_GLOBAL = 0.3
-
-TIPO_CAMBIO_INICIAL = 18.0
-TIPO_CAMBIO_DRIFT_ANUAL = 0.02
-TIPO_CAMBIO_SIGMA_ANUAL = 0.10
 
 
 def _generar_fechas_habiles(fecha_inicio, fecha_fin):
@@ -182,17 +167,13 @@ class ProveedorSintetico(ProveedorCotizacionesBase):
         num_dias = len(fechas)
 
         global_serie = rng.standard_normal(num_dias) * (SIGMA_GLOBAL_ANUAL / math.sqrt(DIAS_POR_ANIO))
-        bmv_serie = rng.standard_normal(num_dias) * (SIGMA_BMV_ANUAL / math.sqrt(DIAS_POR_ANIO))
-        us_serie = rng.standard_normal(num_dias) * (SIGMA_US_ANUAL / math.sqrt(DIAS_POR_ANIO))
-
-        componente_bmv = {'serie': bmv_serie, 'sigma_anual': SIGMA_BMV_ANUAL}
-        componente_us = {'serie': us_serie, 'sigma_anual': SIGMA_US_ANUAL}
+        mercado_serie = rng.standard_normal(num_dias) * (SIGMA_MERCADO_ANUAL / math.sqrt(DIAS_POR_ANIO))
+        componente_mercado = {'serie': mercado_serie, 'sigma_anual': SIGMA_MERCADO_ANUAL}
 
         instrumentos = {}
-        for ticker, nombre, bolsa, moneda, tipo, pais, p0, drift, sigma, beta in (
+        for ticker, nombre, bolsa, tipo, pais, p0, drift, sigma, beta in (
             UNIVERSO_SINTETICO + BENCHMARKS_SINTETICOS
         ):
-            componente_mercado = componente_bmv if bolsa == 'BMV' else componente_us
             precio_suave = _simular_ruta_precio(
                 rng, num_dias, p0, drift, sigma, beta, global_serie, componente_mercado,
             )
@@ -209,20 +190,13 @@ class ProveedorSintetico(ProveedorCotizacionesBase):
             volumen = (volumen_base * np.exp(rng.standard_normal(num_dias) * 0.3)).astype(int)
 
             instrumentos[ticker] = {
-                'nombre': nombre, 'bolsa': bolsa, 'moneda': moneda, 'tipo': tipo, 'pais': pais,
+                'nombre': nombre, 'bolsa': bolsa, 'tipo': tipo, 'pais': pais,
                 'fechas': fechas, 'apertura': apertura, 'maximo': maximo, 'minimo': minimo,
                 'cierre': cierre_crudo, 'cierre_ajustado': cierre_ajustado, 'volumen': volumen,
                 'eventos': eventos,
             }
 
-        dias_tc = num_dias
-        mu_tc_diaria = TIPO_CAMBIO_DRIFT_ANUAL / DIAS_POR_ANIO
-        sigma_tc_diaria = TIPO_CAMBIO_SIGMA_ANUAL / math.sqrt(DIAS_POR_ANIO)
-        ruido_tc = rng.standard_normal(dias_tc) * sigma_tc_diaria
-        log_tc = math.log(TIPO_CAMBIO_INICIAL) + np.cumsum(mu_tc_diaria - 0.5 * sigma_tc_diaria ** 2 + ruido_tc)
-        tipo_cambio = np.exp(log_tc)
-
-        self._cache = {'fechas': fechas, 'instrumentos': instrumentos, 'tipo_cambio': tipo_cambio}
+        self._cache = {'fechas': fechas, 'instrumentos': instrumentos}
         return self._cache
 
     def obtener_precios_historicos(self, instrumento, fecha_inicio, fecha_fin):
@@ -250,14 +224,6 @@ class ProveedorSintetico(ProveedorCotizacionesBase):
         if datos is None:
             return []
         return [e for e in datos['eventos'] if fecha_inicio <= e.fecha_ex <= fecha_fin]
-
-    def obtener_tipo_cambio_usdmxn(self, fecha_inicio, fecha_fin):
-        universo = self._construir_universo()
-        resultado = []
-        for i, fecha in enumerate(universo['fechas']):
-            if fecha_inicio <= fecha <= fecha_fin:
-                resultado.append((fecha, Decimal(str(round(float(universo['tipo_cambio'][i]), 6)))))
-        return resultado
 
     def listar_tickers_universo(self):
         return [t[0] for t in UNIVERSO_SINTETICO]

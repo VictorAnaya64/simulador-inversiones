@@ -12,5 +12,5 @@ def crear_portafolio_al_inscribir(sender, instance, created, **kwargs):
     if created:
         Portafolio.objects.get_or_create(
             inscripcion=instance,
-            defaults={'efectivo_mxn': instance.curso.capital_inicial_mxn},
+            defaults={'efectivo': instance.curso.capital_inicial_usd},
         )

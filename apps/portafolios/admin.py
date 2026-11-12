@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ConversionDivisa, LoteAdquisicion, MovimientoEfectivo, Portafolio, Posicion, ValuacionPortafolio
+from .models import LoteAdquisicion, MovimientoEfectivo, Portafolio, Posicion, ValuacionPortafolio
 
 
 class PosicionInline(admin.TabularInline):
@@ -12,7 +12,7 @@ class PosicionInline(admin.TabularInline):
 
 @admin.register(Portafolio)
 class PortafolioAdmin(admin.ModelAdmin):
-    list_display = ('inscripcion', 'efectivo_mxn', 'efectivo_usd', 'efectivo_mxn_reservado', 'efectivo_usd_reservado')
+    list_display = ('inscripcion', 'efectivo', 'efectivo_reservado')
     search_fields = ('inscripcion__estudiante__username', 'inscripcion__curso__nombre')
     inlines = [PosicionInline]
 
@@ -34,8 +34,8 @@ class LoteAdquisicionAdmin(admin.ModelAdmin):
 
 @admin.register(MovimientoEfectivo)
 class MovimientoEfectivoAdmin(admin.ModelAdmin):
-    list_display = ('portafolio', 'tipo', 'moneda', 'monto', 'saldo_resultante', 'fecha')
-    list_filter = ('tipo', 'moneda')
+    list_display = ('portafolio', 'tipo', 'monto', 'saldo_resultante', 'fecha')
+    list_filter = ('tipo',)
     date_hierarchy = 'fecha'
     readonly_fields = [f.name for f in MovimientoEfectivo._meta.fields]
 
@@ -46,18 +46,9 @@ class MovimientoEfectivoAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(ConversionDivisa)
-class ConversionDivisaAdmin(admin.ModelAdmin):
-    list_display = ('portafolio', 'moneda_origen', 'moneda_destino', 'monto_origen', 'monto_destino', 'fecha')
-    readonly_fields = [f.name for f in ConversionDivisa._meta.fields]
-
-    def has_add_permission(self, request):
-        return False
-
-
 @admin.register(ValuacionPortafolio)
 class ValuacionPortafolioAdmin(admin.ModelAdmin):
-    list_display = ('portafolio', 'fecha', 'valor_total_mxn', 'rendimiento_diario', 'rendimiento_acumulado')
+    list_display = ('portafolio', 'fecha', 'valor_total', 'rendimiento_diario', 'rendimiento_acumulado')
     date_hierarchy = 'fecha'
     readonly_fields = [f.name for f in ValuacionPortafolio._meta.fields]
 

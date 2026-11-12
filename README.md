@@ -2,8 +2,9 @@
 
 Plataforma web para que estudiantes universitarios de Actuaria (materia
 de Teoria de Portafolios de Inversion) administren un portafolio de
-inversion con dinero ficticio, usando cotizaciones de acciones y ETF de
-Mexico y Estados Unidos. Sin dinero real, sin intermediarios financieros.
+inversion con dinero ficticio, usando cotizaciones de acciones y ETF
+listados en NYSE/NASDAQ, todo denominado en USD. Sin dinero real, sin
+intermediarios financieros.
 
 ## Stack
 
@@ -20,7 +21,7 @@ source .venv/Scripts/activate   # Windows (Git Bash); en Linux/Mac: source .venv
 pip install -r requirements-dev.txt
 cp .env.example .env             # DB_ENGINE=sqlite por defecto, no requiere MySQL
 python manage.py migrate
-python manage.py poblar_datos_demo        # catalogo sintetico + precios + tipo de cambio
+python manage.py poblar_datos_demo        # catalogo sintetico + precios historicos
 python manage.py crear_curso_demo --n-estudiantes 10
 python manage.py createsuperuser          # cuenta de administrador general
 python manage.py runserver
@@ -36,10 +37,10 @@ Usuarios estudiante de demostracion: `estudiante_demo_01` .. `estudiante_demo_10
 pytest
 ```
 
-51+ pruebas cubren el motor financiero (ordenes, ejecucion, FIFO,
-idempotencia, concurrencia, conversion de divisas, splits/dividendos),
-el proveedor sintetico de datos de mercado y la analitica de portafolios
-(rendimiento, riesgo, Sharpe/Treynor/Jensen, optimizacion de Markowitz).
+47+ pruebas cubren el motor financiero (ordenes, ejecucion, FIFO,
+idempotencia, concurrencia, splits/dividendos), el proveedor sintetico
+de datos de mercado y la analitica de portafolios (rendimiento, riesgo,
+Sharpe/Treynor/Jensen, optimizacion de Markowitz).
 
 ## Tareas programadas (Cron)
 

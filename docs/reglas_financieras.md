@@ -2,9 +2,11 @@
 
 ## Capital y restricciones generales
 
-- Capital inicial por defecto: $1,000,000.00 MXN (configurable por
-  curso, `Curso.capital_inicial_mxn`). Se asigna automaticamente al
-  crear la inscripcion (senal `apps/portafolios/signals.py`).
+- Capital inicial por defecto: $1,000,000.00 USD (configurable por
+  curso, `Curso.capital_inicial_usd`). Se asigna automaticamente al
+  crear la inscripcion (senal `apps/portafolios/signals.py`). Toda la
+  plataforma opera en una sola divisa (USD): no existe conversion de
+  divisas ni saldos en otras monedas.
 - Prohibido: apalancamiento, ventas en corto, saldos negativos, titulos
   fraccionados (v1), operaciones con dinero real.
 - Todos los importes monetarios usan `Decimal` en Python y `DECIMAL` en
@@ -114,22 +116,16 @@ los modifica (`_recalcular_cache_posicion`).
   Esto es razonable para fines didacticos pero no replica al 100% la
   convencion de algunos proveedores de datos reales.
 
-## Manejo de divisas
+## Divisa unica
 
-- Cada portafolio mantiene saldos separados de MXN y USD. Comprar un
-  instrumento en USD requiere USD disponibles; en MXN requiere MXN
-  disponibles.
-- `convertir_divisa` (`apps/portafolios/services.py`) aplica un spread
-  configurable por curso (`Curso.spread_conversion_divisas`) siempre en
-  contra del estudiante: comprar USD usa un tipo de cambio
-  `base x (1 + spread)` (recibe menos USD); vender USD usa
-  `base x (1 - spread)` (recibe menos MXN). Nunca deja saldos
-  negativos; registra `ConversionDivisa` + dos `MovimientoEfectivo`
-  (salida en la moneda de origen, entrada en la de destino).
-- El valor consolidado del portafolio (`ValuacionPortafolio`) convierte
-  el efectivo en USD y las posiciones en USD a MXN usando el
-  `TipoCambio` vigente **en la fecha de valuacion**, nunca el tipo de
-  cambio actual aplicado retroactivamente a fechas pasadas.
+- Todos los instrumentos cotizan en NYSE o NASDAQ y estan denominados
+  en USD; cada portafolio mantiene un unico saldo de efectivo
+  (`Portafolio.efectivo`) tambien en USD. No existe conversion de
+  divisas, tipo de cambio, ni saldos en otras monedas: esto es
+  deliberado para mantener el modelo simple para el curso.
+- El valor consolidado del portafolio (`ValuacionPortafolio`) es
+  simplemente `efectivo + valor_de_mercado_de_las_posiciones`, sin
+  ningun ajuste cambiario.
 
 ## Metricas de teoria de portafolios (`apps/analitica/services.py`)
 

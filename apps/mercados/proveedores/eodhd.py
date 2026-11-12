@@ -3,8 +3,8 @@ Adaptador para EODHD (https://eodhd.com). NO IMPLEMENTADO TODAVIA.
 
 Antes de implementar las llamadas reales a la API:
 1. Verificar en la documentacion oficial vigente de EODHD los endpoints
-   exactos de precios historicos EOD, splits, dividendos y tipos de
-   cambio, y sus formatos de respuesta (pueden cambiar entre planes).
+   exactos de precios historicos EOD, splits y dividendos, y sus
+   formatos de respuesta (pueden cambiar entre planes).
 2. Confirmar en los terminos de la suscripcion si esta permitido
    redistribuir los datos a los estudiantes (uso educativo en grupo),
    ya que una suscripcion personal no necesariamente lo autoriza.
@@ -26,11 +26,6 @@ class ProveedorEODHD(ProveedorCotizacionesBase):
         )
 
     def obtener_eventos_corporativos(self, instrumento, fecha_inicio, fecha_fin):
-        raise NotImplementedError(
-            'Adaptador EODHD pendiente de implementar y verificar contra la documentacion oficial.'
-        )
-
-    def obtener_tipo_cambio_usdmxn(self, fecha_inicio, fecha_fin):
         raise NotImplementedError(
             'Adaptador EODHD pendiente de implementar y verificar contra la documentacion oficial.'
         )

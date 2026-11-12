@@ -48,8 +48,3 @@ class ProveedorCotizacionesBase(ABC):
     def obtener_eventos_corporativos(self, instrumento, fecha_inicio, fecha_fin):
         """Devuelve una lista de EventoCorporativoDTO para `instrumento` entre las fechas dadas."""
         raise NotImplementedError
-
-    @abstractmethod
-    def obtener_tipo_cambio_usdmxn(self, fecha_inicio, fecha_fin):
-        """Devuelve una lista de (fecha, valor) del tipo de cambio USD/MXN entre las fechas dadas."""
-        raise NotImplementedError

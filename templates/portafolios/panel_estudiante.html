@@ -4,13 +4,13 @@
 <h1 class="h3 mb-3">{{ curso.nombre }}</h1>
 
 <div class="row g-3 mb-3">
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div class="card card-metrica h-100"><div class="card-body">
-            <div class="text-muted small">Valor total del portafolio</div>
-            <div class="h4 mb-0">${{ ultima_valuacion.valor_total_mxn|default:portafolio.efectivo_mxn|floatformat:2 }}</div>
+            <div class="text-muted small">Valor total del portafolio (USD)</div>
+            <div class="h4 mb-0">${{ ultima_valuacion.valor_total|default:portafolio.efectivo|floatformat:2 }}</div>
         </div></div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div class="card card-metrica h-100"><div class="card-body">
             <div class="text-muted small">Rendimiento acumulado</div>
             {% if metrica and not metrica.observaciones_insuficientes %}
@@ -22,18 +22,11 @@
             {% endif %}
         </div></div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div class="card card-metrica h-100"><div class="card-body">
-            <div class="text-muted small">Efectivo MXN</div>
-            <div class="h4 mb-0">${{ portafolio.efectivo_mxn|floatformat:2 }}</div>
-            <div class="small text-muted">Reservado: ${{ portafolio.efectivo_mxn_reservado|floatformat:2 }}</div>
-        </div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="card card-metrica h-100"><div class="card-body">
-            <div class="text-muted small">Efectivo USD</div>
-            <div class="h4 mb-0">${{ portafolio.efectivo_usd|floatformat:2 }}</div>
-            <div class="small text-muted">Reservado: ${{ portafolio.efectivo_usd_reservado|floatformat:2 }}</div>
+            <div class="text-muted small">Efectivo disponible (USD)</div>
+            <div class="h4 mb-0">${{ portafolio.efectivo_disponible|floatformat:2 }}</div>
+            <div class="small text-muted">Reservado: ${{ portafolio.efectivo_reservado|floatformat:2 }}</div>
         </div></div>
     </div>
 </div>
@@ -58,7 +51,7 @@
 </div>
 
 <div class="row g-3 mb-3">
-    <div class="col-md-7">
+    <div class="col-12">
         <div class="card card-metrica">
             <div class="card-body">
                 <h2 class="h6">Mis posiciones</h2>
@@ -81,29 +74,6 @@
             </div>
         </div>
     </div>
-    <div class="col-md-5">
-        <div class="card card-metrica">
-            <div class="card-body">
-                <h2 class="h6">Convertir efectivo MXN &harr; USD</h2>
-                {% if tipo_cambio %}
-                <p class="small text-muted">Tipo de cambio base USD/MXN: {{ tipo_cambio.valor|floatformat:4 }} ({{ tipo_cambio.fecha }}). Se aplica el spread del curso: {{ curso.spread_conversion_divisas }}.</p>
-                <form method="post">
-                    {% csrf_token %}
-                    {% for field in form_conversion %}
-                    <div class="mb-2">
-                        <label class="form-label small">{{ field.label }}</label>
-                        {{ field }}
-                        {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                    </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary btn-sm">Convertir</button>
-                </form>
-                {% else %}
-                <p class="text-muted">Aun no hay tipo de cambio cargado.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
 
@@ -113,7 +83,7 @@
     var valores = {{ valores_json|safe }};
     Plotly.newPlot('grafica-evolucion', [{
         x: fechas, y: valores, type: 'scatter', mode: 'lines', fill: 'tozeroy',
-        line: {color: '#0b2545'}, fillcolor: 'rgba(11,37,69,0.08)', name: 'Valor total (MXN)',
+        line: {color: '#0b2545'}, fillcolor: 'rgba(11,37,69,0.08)', name: 'Valor total (USD)',
     }], {margin: {t: 10, r: 10, b: 30, l: 50}}, {displayModeBar: false, responsive: true});
 
     var etiquetas = {{ distribucion_labels_json|safe }};

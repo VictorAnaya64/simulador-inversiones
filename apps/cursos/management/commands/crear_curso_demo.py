@@ -39,7 +39,7 @@ class Command(BaseCommand):
             profesor.save()
             self.stdout.write(self.style.SUCCESS(f'Profesor creado: {profesor.username} / {password}'))
 
-        benchmark = Instrumento.objects.filter(ticker='SIDXBMV', tipo_instrumento='INDICE').first()
+        benchmark = Instrumento.objects.filter(ticker='SIDXUS', tipo_instrumento='INDICE').first()
 
         curso, creado = Curso.objects.get_or_create(
             nombre=options['nombre_curso'],

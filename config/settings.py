@@ -178,9 +178,8 @@ SESSION_COOKIE_AGE = config('SESSION_COOKIE_AGE', default=28800, cast=int)  # 8 
 # docs/reglas_financieras.md; cada curso puede sobreescribir los que
 # correspondan a nivel de configuracion de curso).
 SIMULADOR = {
-    'CAPITAL_INICIAL_MXN_DEFAULT': config('CAPITAL_INICIAL_MXN_DEFAULT', default='1000000.00'),
+    'CAPITAL_INICIAL_USD_DEFAULT': config('CAPITAL_INICIAL_USD_DEFAULT', default='1000000.00'),
     'TASA_LIBRE_RIESGO_ANUAL_DEFAULT': config('TASA_LIBRE_RIESGO_ANUAL_DEFAULT', default='0.10'),
-    'SPREAD_CONVERSION_DIVISAS_DEFAULT': config('SPREAD_CONVERSION_DIVISAS_DEFAULT', default='0.005'),
     'COMISION_OPERACION_DEFAULT': config('COMISION_OPERACION_DEFAULT', default='0.00'),
     'PROVEEDOR_DATOS_MERCADO': config('PROVEEDOR_DATOS_MERCADO', default='sintetico'),
 }

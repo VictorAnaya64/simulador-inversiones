@@ -1,20 +1,19 @@
 """
 Servicios reutilizables sobre portafolios: reservas de efectivo y
-titulos, conversion de divisas y aplicacion de ejecuciones (compra y
-venta) con costeo FIFO. Toda funcion que modifica saldos debe llamarse
-dentro de una transaccion atomica que ya tenga bloqueado (select_for_update)
-el portafolio/posicion relevante, para evitar condiciones de carrera
-entre operaciones concurrentes del mismo estudiante.
+titulos, y aplicacion de ejecuciones (compra y venta) con costeo FIFO.
+Toda funcion que modifica saldos debe llamarse dentro de una
+transaccion atomica que ya tenga bloqueado (select_for_update) el
+portafolio/posicion relevante, para evitar condiciones de carrera entre
+operaciones concurrentes del mismo estudiante. Todo el efectivo esta
+denominado en USD (la plataforma no modela otras divisas).
 """
 from decimal import Decimal
 
 from django.db import transaction
 from django.utils import timezone
 
-from apps.mercados.models import Moneda
-
 from .excepciones import EfectivoInsuficienteError, TitulosInsuficientesError
-from .models import ConversionDivisa, LoteAdquisicion, MovimientoEfectivo, Posicion
+from .models import LoteAdquisicion, MovimientoEfectivo, Posicion
 
 CERO = Decimal('0.00')
 CENTAVO = Decimal('0.01')
@@ -26,32 +25,22 @@ def bloquear_portafolio(portafolio):
     return Portafolio.objects.select_for_update().get(pk=portafolio.pk)
 
 
-def _campo_efectivo(moneda):
-    return 'efectivo_mxn' if moneda == Moneda.MXN else 'efectivo_usd'
-
-
-def _campo_reservado(moneda):
-    return 'efectivo_mxn_reservado' if moneda == Moneda.MXN else 'efectivo_usd_reservado'
-
-
-def registrar_movimiento_efectivo(portafolio, moneda, tipo, monto, descripcion='', referencia_tipo='', referencia_id='', fecha=None):
+def registrar_movimiento_efectivo(portafolio, tipo, monto, descripcion='', referencia_tipo='', referencia_id='', fecha=None):
     """
     Aplica `monto` (positivo=entrada, negativo=salida) al efectivo del
     portafolio (bloqueado por el llamador) y registra el movimiento.
     Nunca permite que el saldo quede negativo.
     """
-    campo = _campo_efectivo(moneda)
-    saldo_actual = getattr(portafolio, campo)
+    saldo_actual = portafolio.efectivo
     nuevo_saldo = saldo_actual + monto
     if nuevo_saldo < CERO:
         raise EfectivoInsuficienteError(
-            f'El movimiento dejaria saldo negativo en {moneda}: {saldo_actual} + {monto} = {nuevo_saldo}'
+            f'El movimiento dejaria saldo negativo: {saldo_actual} + {monto} = {nuevo_saldo}'
         )
-    setattr(portafolio, campo, nuevo_saldo)
-    portafolio.save(update_fields=[campo, 'actualizado_en'])
+    portafolio.efectivo = nuevo_saldo
+    portafolio.save(update_fields=['efectivo', 'actualizado_en'])
     return MovimientoEfectivo.objects.create(
         portafolio=portafolio,
-        moneda=moneda,
         tipo=tipo,
         monto=monto,
         saldo_resultante=nuevo_saldo,
@@ -62,24 +51,21 @@ def registrar_movimiento_efectivo(portafolio, moneda, tipo, monto, descripcion='
     )
 
 
-def reservar_efectivo(portafolio, moneda, monto):
+def reservar_efectivo(portafolio, monto):
     """Reserva `monto` del efectivo disponible (no afecta el efectivo total, solo el reservado)."""
-    disponible = portafolio.efectivo_disponible(moneda)
+    disponible = portafolio.efectivo_disponible()
     if monto > disponible:
         raise EfectivoInsuficienteError(
-            f'Efectivo disponible insuficiente en {moneda}: disponible={disponible}, solicitado={monto}'
+            f'Efectivo disponible insuficiente: disponible={disponible}, solicitado={monto}'
         )
-    campo = _campo_reservado(moneda)
-    setattr(portafolio, campo, getattr(portafolio, campo) + monto)
-    portafolio.save(update_fields=[campo, 'actualizado_en'])
+    portafolio.efectivo_reservado += monto
+    portafolio.save(update_fields=['efectivo_reservado', 'actualizado_en'])
 
 
-def liberar_efectivo(portafolio, moneda, monto):
+def liberar_efectivo(portafolio, monto):
     """Libera `monto` previamente reservado (nunca deja el reservado negativo)."""
-    campo = _campo_reservado(moneda)
-    nuevo_valor = max(CERO, getattr(portafolio, campo) - monto)
-    setattr(portafolio, campo, nuevo_valor)
-    portafolio.save(update_fields=[campo, 'actualizado_en'])
+    portafolio.efectivo_reservado = max(CERO, portafolio.efectivo_reservado - monto)
+    portafolio.save(update_fields=['efectivo_reservado', 'actualizado_en'])
 
 
 def obtener_o_crear_posicion(portafolio, instrumento):
@@ -117,12 +103,11 @@ def aplicar_ejecucion_compra(ejecucion):
     """
     orden = ejecucion.orden
     portafolio = bloquear_portafolio(orden.portafolio)
-    moneda = orden.moneda
     monto_reservado = orden.monto_efectivo_reservado or CERO
 
-    liberar_efectivo(portafolio, moneda, monto_reservado)
+    liberar_efectivo(portafolio, monto_reservado)
     registrar_movimiento_efectivo(
-        portafolio, moneda, MovimientoEfectivo.Tipo.COMPRA, -ejecucion.importe_neto,
+        portafolio, MovimientoEfectivo.Tipo.COMPRA, -ejecucion.importe_neto,
         descripcion=f'Compra {orden.cantidad} {orden.instrumento.ticker} @ {ejecucion.precio_ejecucion}',
         referencia_tipo='Ejecucion', referencia_id=ejecucion.pk, fecha=ejecucion.fecha_ejecucion,
     )
@@ -173,7 +158,7 @@ def aplicar_ejecucion_venta(ejecucion):
     _recalcular_cache_posicion(posicion, cantidad_ya_actualizada=True)
 
     registrar_movimiento_efectivo(
-        portafolio, orden.moneda, MovimientoEfectivo.Tipo.VENTA, ejecucion.importe_neto,
+        portafolio, MovimientoEfectivo.Tipo.VENTA, ejecucion.importe_neto,
         descripcion=(
             f'Venta {orden.cantidad} {orden.instrumento.ticker} @ {ejecucion.precio_ejecucion} '
             f'(G/P realizada: {ganancia_realizada})'
@@ -192,54 +177,6 @@ def _recalcular_cache_posicion(posicion, cantidad_ya_actualizada=False):
         posicion.cantidad = cantidad_total
     posicion.costo_promedio = (costo_total / cantidad_total) if cantidad_total > 0 else CERO
     posicion.save(update_fields=['cantidad', 'costo_promedio', 'actualizado_en'])
-
-
-@transaction.atomic
-def convertir_divisa(portafolio, moneda_origen, moneda_destino, monto_origen, tipo_cambio_base, spread):
-    """
-    Convierte efectivo entre MXN y USD aplicando un spread contra el
-    estudiante (comprar la divisa extranjera siempre cuesta un poco mas
-    que el tipo de cambio base; venderla rinde un poco menos).
-    """
-    if moneda_origen == moneda_destino:
-        raise ValueError('La conversion requiere monedas distintas.')
-
-    portafolio = bloquear_portafolio(portafolio)
-    disponible = portafolio.efectivo_disponible(moneda_origen)
-    if monto_origen > disponible:
-        raise EfectivoInsuficienteError(
-            f'Efectivo disponible insuficiente en {moneda_origen} para convertir: '
-            f'disponible={disponible}, solicitado={monto_origen}'
-        )
-
-    if moneda_origen == Moneda.MXN and moneda_destino == Moneda.USD:
-        # Comprar USD: el estudiante recibe menos USD por cada MXN (tipo de cambio efectivo mas alto).
-        tipo_cambio_efectivo = tipo_cambio_base * (Decimal('1') + spread)
-        monto_destino = (monto_origen / tipo_cambio_efectivo).quantize(Decimal('0.01'))
-    else:
-        # Vender USD: el estudiante recibe menos MXN por cada USD (tipo de cambio efectivo mas bajo).
-        tipo_cambio_efectivo = tipo_cambio_base * (Decimal('1') - spread)
-        monto_destino = (monto_origen * tipo_cambio_efectivo).quantize(Decimal('0.01'))
-
-    registrar_movimiento_efectivo(
-        portafolio, moneda_origen, MovimientoEfectivo.Tipo.CONVERSION_SALIDA, -monto_origen,
-        descripcion=f'Conversion {moneda_origen}->{moneda_destino}',
-    )
-    registrar_movimiento_efectivo(
-        portafolio, moneda_destino, MovimientoEfectivo.Tipo.CONVERSION_ENTRADA, monto_destino,
-        descripcion=f'Conversion {moneda_origen}->{moneda_destino}',
-    )
-    return ConversionDivisa.objects.create(
-        portafolio=portafolio,
-        fecha=timezone.now(),
-        moneda_origen=moneda_origen,
-        moneda_destino=moneda_destino,
-        monto_origen=monto_origen,
-        tipo_cambio_base=tipo_cambio_base,
-        spread_aplicado=spread,
-        tipo_cambio_efectivo=tipo_cambio_efectivo,
-        monto_destino=monto_destino,
-    )
 
 
 @transaction.atomic
@@ -283,7 +220,7 @@ def aplicar_dividendo(evento):
         if monto_total <= 0:
             continue
         registrar_movimiento_efectivo(
-            portafolio, evento.instrumento.moneda, MovimientoEfectivo.Tipo.DIVIDENDO, monto_total,
+            portafolio, MovimientoEfectivo.Tipo.DIVIDENDO, monto_total,
             descripcion=f'Dividendo {evento.instrumento.ticker} ex-fecha {evento.fecha_ex}',
             referencia_tipo='EventoCorporativo', referencia_id=evento.pk, fecha=timezone.now(),
         )

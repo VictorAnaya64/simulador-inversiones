@@ -4,23 +4,21 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from apps.cursos.models import Inscripcion
-from apps.mercados.models import Instrumento, Moneda
+from apps.mercados.models import Instrumento
 
 CERO = Decimal('0')
 
 
 class Portafolio(models.Model):
     """
-    Un portafolio por inscripcion (estudiante x curso). Mantiene saldos
-    de efectivo separados por moneda; nunca deben quedar negativos
-    (enforced en el motor de ordenes/conversiones, no solo aqui).
+    Un portafolio por inscripcion (estudiante x curso). Mantiene un
+    unico saldo de efectivo en USD; nunca debe quedar negativo
+    (enforced en el motor de ordenes, no solo aqui).
     """
 
     inscripcion = models.OneToOneField(Inscripcion, on_delete=models.CASCADE, related_name='portafolio')
-    efectivo_mxn = models.DecimalField(max_digits=18, decimal_places=2, default=CERO, validators=[MinValueValidator(CERO)])
-    efectivo_usd = models.DecimalField(max_digits=18, decimal_places=2, default=CERO, validators=[MinValueValidator(CERO)])
-    efectivo_mxn_reservado = models.DecimalField(max_digits=18, decimal_places=2, default=CERO, validators=[MinValueValidator(CERO)])
-    efectivo_usd_reservado = models.DecimalField(max_digits=18, decimal_places=2, default=CERO, validators=[MinValueValidator(CERO)])
+    efectivo = models.DecimalField(max_digits=18, decimal_places=2, default=CERO, validators=[MinValueValidator(CERO)])
+    efectivo_reservado = models.DecimalField(max_digits=18, decimal_places=2, default=CERO, validators=[MinValueValidator(CERO)])
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -31,10 +29,8 @@ class Portafolio(models.Model):
     def __str__(self):
         return f'Portafolio de {self.inscripcion.estudiante} - {self.inscripcion.curso}'
 
-    def efectivo_disponible(self, moneda):
-        if moneda == Moneda.MXN:
-            return self.efectivo_mxn - self.efectivo_mxn_reservado
-        return self.efectivo_usd - self.efectivo_usd_reservado
+    def efectivo_disponible(self):
+        return self.efectivo - self.efectivo_reservado
 
 
 class Posicion(models.Model):
@@ -104,12 +100,9 @@ class MovimientoEfectivo(models.Model):
         VENTA = 'VENTA', 'Venta de instrumento'
         COMISION = 'COMISION', 'Comision'
         DIVIDENDO = 'DIVIDENDO', 'Dividendo recibido'
-        CONVERSION_ENTRADA = 'CONVERSION_ENTRADA', 'Entrada por conversion de divisa'
-        CONVERSION_SALIDA = 'CONVERSION_SALIDA', 'Salida por conversion de divisa'
         AJUSTE_ADMINISTRATIVO = 'AJUSTE_ADMINISTRATIVO', 'Ajuste administrativo (compensatorio)'
 
     portafolio = models.ForeignKey(Portafolio, on_delete=models.CASCADE, related_name='movimientos_efectivo')
-    moneda = models.CharField(max_length=3, choices=Moneda.choices)
     tipo = models.CharField(max_length=25, choices=Tipo.choices)
     monto = models.DecimalField(max_digits=18, decimal_places=2, help_text='Positivo = entrada, negativo = salida.')
     saldo_resultante = models.DecimalField(max_digits=18, decimal_places=2)
@@ -126,29 +119,7 @@ class MovimientoEfectivo(models.Model):
         indexes = [models.Index(fields=['portafolio', '-fecha'])]
 
     def __str__(self):
-        return f'{self.portafolio} {self.tipo} {self.monto} {self.moneda}'
-
-
-class ConversionDivisa(models.Model):
-    """Conversion simulada de efectivo entre MXN y USD dentro de un portafolio."""
-
-    portafolio = models.ForeignKey(Portafolio, on_delete=models.CASCADE, related_name='conversiones_divisa')
-    fecha = models.DateTimeField()
-    moneda_origen = models.CharField(max_length=3, choices=Moneda.choices)
-    moneda_destino = models.CharField(max_length=3, choices=Moneda.choices)
-    monto_origen = models.DecimalField(max_digits=18, decimal_places=2)
-    tipo_cambio_base = models.DecimalField(max_digits=12, decimal_places=6)
-    spread_aplicado = models.DecimalField(max_digits=6, decimal_places=5)
-    tipo_cambio_efectivo = models.DecimalField(max_digits=12, decimal_places=6)
-    monto_destino = models.DecimalField(max_digits=18, decimal_places=2)
-
-    class Meta:
-        verbose_name = 'conversion de divisa'
-        verbose_name_plural = 'conversiones de divisa'
-        ordering = ['-fecha']
-
-    def __str__(self):
-        return f'{self.portafolio} {self.moneda_origen}->{self.moneda_destino} {self.monto_origen}'
+        return f'{self.portafolio} {self.tipo} {self.monto}'
 
 
 class ValuacionPortafolio(models.Model):
@@ -160,11 +131,9 @@ class ValuacionPortafolio(models.Model):
 
     portafolio = models.ForeignKey(Portafolio, on_delete=models.CASCADE, related_name='valuaciones')
     fecha = models.DateField()
-    valor_efectivo_mxn = models.DecimalField(max_digits=18, decimal_places=2)
-    valor_efectivo_usd_en_mxn = models.DecimalField(max_digits=18, decimal_places=2)
-    valor_posiciones_mxn = models.DecimalField(max_digits=18, decimal_places=2)
-    valor_total_mxn = models.DecimalField(max_digits=18, decimal_places=2)
-    tipo_cambio_usado = models.DecimalField(max_digits=12, decimal_places=6)
+    valor_efectivo = models.DecimalField(max_digits=18, decimal_places=2)
+    valor_posiciones = models.DecimalField(max_digits=18, decimal_places=2)
+    valor_total = models.DecimalField(max_digits=18, decimal_places=2)
     rendimiento_diario = models.DecimalField(max_digits=12, decimal_places=8, null=True, blank=True)
     rendimiento_acumulado = models.DecimalField(max_digits=12, decimal_places=8, null=True, blank=True)
 
@@ -178,4 +147,4 @@ class ValuacionPortafolio(models.Model):
         ordering = ['portafolio', 'fecha']
 
     def __str__(self):
-        return f'{self.portafolio} {self.fecha} total={self.valor_total_mxn}'
+        return f'{self.portafolio} {self.fecha} total={self.valor_total}'

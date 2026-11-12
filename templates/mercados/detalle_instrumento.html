@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-start mb-3">
     <div>
         <h1 class="h3 mb-0">{{ instrumento.ticker }} &mdash; {{ instrumento.nombre }}</h1>
-        <p class="text-muted mb-0">{{ instrumento.bolsa }} &middot; {{ instrumento.moneda }} &middot; {{ instrumento.get_tipo_instrumento_display }} &middot; {{ instrumento.pais }}</p>
+        <p class="text-muted mb-0">{{ instrumento.bolsa }} &middot; USD &middot; {{ instrumento.get_tipo_instrumento_display }} &middot; {{ instrumento.pais }}</p>
     </div>
     {% if user.es_estudiante %}
     <div>
@@ -17,7 +17,7 @@
 <div class="card card-metrica mb-3">
     <div class="card-body">
         {% if ultimo_precio %}
-        <p class="mb-0">Ultimo cierre: <strong>{{ ultimo_precio.cierre|floatformat:2 }} {{ instrumento.moneda }}</strong> ({{ ultimo_precio.fecha }})</p>
+        <p class="mb-0">Ultimo cierre: <strong>{{ ultimo_precio.cierre|floatformat:2 }} USD</strong> ({{ ultimo_precio.fecha }})</p>
         {% else %}
         <p class="mb-0 text-muted">Aun no hay precios cargados para este instrumento.</p>
         {% endif %}
@@ -40,7 +40,7 @@
         line: {color: '#0b2545'}, name: 'Cierre ajustado',
     }], {
         margin: {t: 20, r: 20, b: 40, l: 50},
-        xaxis: {title: 'Fecha'}, yaxis: {title: 'Precio ({{ instrumento.moneda }})'},
+        xaxis: {title: 'Fecha'}, yaxis: {title: 'Precio (USD)'},
     }, {displayModeBar: false, responsive: true});
 </script>
 {% endblock %}

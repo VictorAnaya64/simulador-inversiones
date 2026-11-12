@@ -23,17 +23,13 @@ class Curso(models.Model):
     )
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
-    capital_inicial_mxn = models.DecimalField(
+    capital_inicial_usd = models.DecimalField(
         max_digits=18, decimal_places=2, default=Decimal('1000000.00'),
         validators=[MinValueValidator(Decimal('0.01'))],
     )
     tasa_libre_riesgo_anual = models.DecimalField(
         max_digits=8, decimal_places=5, default=Decimal('0.10'),
         help_text='Tasa libre de riesgo anualizada usada en Sharpe/Treynor/Jensen para este curso.',
-    )
-    spread_conversion_divisas = models.DecimalField(
-        max_digits=6, decimal_places=5, default=Decimal('0.005'),
-        help_text='Spread aplicado a conversiones MXN<->USD, como fraccion (0.005 = 0.5%).',
     )
     comision_operacion = models.DecimalField(
         max_digits=6, decimal_places=5, default=Decimal('0.00'),

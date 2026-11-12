@@ -20,8 +20,3 @@ class ProveedorTwelveData(ProveedorCotizacionesBase):
         raise NotImplementedError(
             'Adaptador Twelve Data pendiente de implementar y verificar contra la documentacion oficial.'
         )
-
-    def obtener_tipo_cambio_usdmxn(self, fecha_inicio, fecha_fin):
-        raise NotImplementedError(
-            'Adaptador Twelve Data pendiente de implementar y verificar contra la documentacion oficial.'
-        )

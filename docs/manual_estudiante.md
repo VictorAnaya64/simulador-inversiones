@@ -7,15 +7,16 @@ entrar, llegas directo a tu **Panel**.
 
 ## Tu panel principal
 
-Muestra: valor total de tu portafolio, rendimiento acumulado, efectivo
-disponible en MXN y en USD (y cuanto de ese efectivo esta "reservado"
-por ordenes pendientes), la evolucion historica de tu portafolio y la
+Muestra: valor total de tu portafolio (en USD), rendimiento acumulado,
+efectivo disponible (y cuanto de ese efectivo esta "reservado" por
+ordenes pendientes), la evolucion historica de tu portafolio y la
 distribucion de tu inversion por instrumento.
 
 ## Buscar instrumentos
 
-En **Mercado**, busca por ticker o nombre. Cada instrumento muestra su
-bolsa, moneda, tipo, ultimo precio conocido y una grafica de precio
+En **Mercado**, busca por ticker o nombre. Todos los instrumentos
+cotizan en NYSE o NASDAQ y estan denominados en USD. Cada instrumento
+muestra su bolsa, tipo, ultimo precio conocido y una grafica de precio
 historico (ajustado por splits y dividendos). Desde ahi tienes los
 botones **Comprar** y **Vender**.
 
@@ -30,9 +31,8 @@ botones **Comprar** y **Vender**.
    tienes suficiente efectivo adicional disponible, tu orden de compra
    se **rechaza** automaticamente (nunca se te cobra de mas ni quedas
    con saldo negativo).
-3. Para comprar un instrumento en USD necesitas tener dolares
-   disponibles (usa la conversion de divisas en tu panel si no los
-   tienes). Para instrumentos en MXN necesitas pesos disponibles.
+3. Todo tu efectivo y todos los instrumentos estan en USD; no hay que
+   convertir ninguna divisa para comprar nada.
 
 ## Revisar tus ordenes
 
@@ -40,14 +40,6 @@ En **Operaciones** ves todas tus ordenes: pendientes, ejecutadas (con
 el precio real al que se ejecutaron), canceladas y rechazadas (con el
 motivo). Puedes cancelar una orden mientras siga **pendiente** — esto
 libera de inmediato el efectivo o los titulos que tenia reservados.
-
-## Convertir efectivo entre MXN y USD
-
-Desde tu panel, elige la moneda de origen y el monto a convertir. Se te
-muestra el tipo de cambio base vigente; se aplica un pequeno spread
-(definido por tu profesor para el curso) tanto al comprar como al
-vender dolares — es normal que el tipo de cambio efectivo de tu
-conversion sea un poco distinto del tipo de cambio "de referencia".
 
 ## Analizar tu portafolio
 

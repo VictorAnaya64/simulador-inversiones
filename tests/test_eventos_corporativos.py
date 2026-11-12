@@ -24,14 +24,14 @@ def _comprar_y_ejecutar(portafolio, instrumento, estudiante, fabrica_precio, can
 
 
 @pytest.mark.django_db
-def test_split_duplica_cantidad_y_divide_costo(portafolio, instrumento_bmv, estudiante, fabrica_precio):
-    _comprar_y_ejecutar(portafolio, instrumento_bmv, estudiante, fabrica_precio, 10, '100.00', 'split-compra-1')
-    posicion = Posicion.objects.get(portafolio=portafolio, instrumento=instrumento_bmv)
+def test_split_duplica_cantidad_y_divide_costo(portafolio, instrumento_nyse, estudiante, fabrica_precio):
+    _comprar_y_ejecutar(portafolio, instrumento_nyse, estudiante, fabrica_precio, 10, '100.00', 'split-compra-1')
+    posicion = Posicion.objects.get(portafolio=portafolio, instrumento=instrumento_nyse)
     assert posicion.cantidad == Decimal('10')
     assert posicion.costo_promedio == Decimal('100.00')
 
     EventoCorporativo.objects.create(
-        instrumento=instrumento_bmv, tipo=EventoCorporativo.Tipo.SPLIT,
+        instrumento=instrumento_nyse, tipo=EventoCorporativo.Tipo.SPLIT,
         fecha_ex=timezone.localdate(), factor_split=Decimal('2.0'),
     )
 
@@ -46,50 +46,50 @@ def test_split_duplica_cantidad_y_divide_costo(portafolio, instrumento_bmv, estu
 
 
 @pytest.mark.django_db
-def test_split_no_se_reaplica_al_correr_el_comando_dos_veces(portafolio, instrumento_bmv, estudiante, fabrica_precio):
-    _comprar_y_ejecutar(portafolio, instrumento_bmv, estudiante, fabrica_precio, 10, '100.00', 'split-compra-2')
+def test_split_no_se_reaplica_al_correr_el_comando_dos_veces(portafolio, instrumento_nyse, estudiante, fabrica_precio):
+    _comprar_y_ejecutar(portafolio, instrumento_nyse, estudiante, fabrica_precio, 10, '100.00', 'split-compra-2')
     EventoCorporativo.objects.create(
-        instrumento=instrumento_bmv, tipo=EventoCorporativo.Tipo.SPLIT,
+        instrumento=instrumento_nyse, tipo=EventoCorporativo.Tipo.SPLIT,
         fecha_ex=timezone.localdate(), factor_split=Decimal('2.0'),
     )
     call_command('aplicar_eventos_corporativos')
     call_command('aplicar_eventos_corporativos')
 
-    posicion = Posicion.objects.get(portafolio=portafolio, instrumento=instrumento_bmv)
+    posicion = Posicion.objects.get(portafolio=portafolio, instrumento=instrumento_nyse)
     assert posicion.cantidad == Decimal('20')  # no se duplico una segunda vez
 
 
 @pytest.mark.django_db
-def test_dividendo_acredita_efectivo_proporcional_a_cantidad(portafolio, instrumento_bmv, estudiante, fabrica_precio):
-    _comprar_y_ejecutar(portafolio, instrumento_bmv, estudiante, fabrica_precio, 100, '50.00', 'div-compra-1')
-    efectivo_antes = portafolio.efectivo_mxn
+def test_dividendo_acredita_efectivo_proporcional_a_cantidad(portafolio, instrumento_nyse, estudiante, fabrica_precio):
+    _comprar_y_ejecutar(portafolio, instrumento_nyse, estudiante, fabrica_precio, 100, '50.00', 'div-compra-1')
+    efectivo_antes = portafolio.efectivo
     portafolio.refresh_from_db()
-    efectivo_antes = portafolio.efectivo_mxn
+    efectivo_antes = portafolio.efectivo
 
     EventoCorporativo.objects.create(
-        instrumento=instrumento_bmv, tipo=EventoCorporativo.Tipo.DIVIDENDO,
+        instrumento=instrumento_nyse, tipo=EventoCorporativo.Tipo.DIVIDENDO,
         fecha_ex=timezone.localdate(), monto_dividendo_por_titulo=Decimal('2.50'),
     )
     call_command('aplicar_eventos_corporativos')
 
     portafolio.refresh_from_db()
-    assert portafolio.efectivo_mxn == efectivo_antes + Decimal('250.00')
+    assert portafolio.efectivo == efectivo_antes + Decimal('250.00')
     assert MovimientoEfectivo.objects.filter(portafolio=portafolio, tipo=MovimientoEfectivo.Tipo.DIVIDENDO).count() == 1
 
 
 @pytest.mark.django_db
-def test_dividendo_no_se_reprocesa_al_correr_el_comando_dos_veces(portafolio, instrumento_bmv, estudiante, fabrica_precio):
-    _comprar_y_ejecutar(portafolio, instrumento_bmv, estudiante, fabrica_precio, 100, '50.00', 'div-compra-2')
+def test_dividendo_no_se_reprocesa_al_correr_el_comando_dos_veces(portafolio, instrumento_nyse, estudiante, fabrica_precio):
+    _comprar_y_ejecutar(portafolio, instrumento_nyse, estudiante, fabrica_precio, 100, '50.00', 'div-compra-2')
     portafolio.refresh_from_db()
-    efectivo_antes = portafolio.efectivo_mxn
+    efectivo_antes = portafolio.efectivo
 
     EventoCorporativo.objects.create(
-        instrumento=instrumento_bmv, tipo=EventoCorporativo.Tipo.DIVIDENDO,
+        instrumento=instrumento_nyse, tipo=EventoCorporativo.Tipo.DIVIDENDO,
         fecha_ex=timezone.localdate(), monto_dividendo_por_titulo=Decimal('2.50'),
     )
     call_command('aplicar_eventos_corporativos')
     call_command('aplicar_eventos_corporativos')
 
     portafolio.refresh_from_db()
-    assert portafolio.efectivo_mxn == efectivo_antes + Decimal('250.00')
+    assert portafolio.efectivo == efectivo_antes + Decimal('250.00')
     assert MovimientoEfectivo.objects.filter(portafolio=portafolio, tipo=MovimientoEfectivo.Tipo.DIVIDENDO).count() == 1

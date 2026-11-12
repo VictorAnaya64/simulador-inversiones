@@ -15,8 +15,8 @@ class FormularioCurso(forms.ModelForm):
     class Meta:
         model = Curso
         fields = [
-            'nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'capital_inicial_mxn',
-            'tasa_libre_riesgo_anual', 'spread_conversion_divisas', 'comision_operacion',
+            'nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'capital_inicial_usd',
+            'tasa_libre_riesgo_anual', 'comision_operacion',
             'instrumentos_permitidos', 'benchmark_principal', 'operaciones_activas',
         ]
         widgets = {
@@ -24,9 +24,8 @@ class FormularioCurso(forms.ModelForm):
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'fecha_inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'fecha_fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'capital_inicial_mxn': forms.NumberInput(attrs={'class': 'form-control'}),
+            'capital_inicial_usd': forms.NumberInput(attrs={'class': 'form-control'}),
             'tasa_libre_riesgo_anual': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'}),
-            'spread_conversion_divisas': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'}),
             'comision_operacion': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'}),
             'instrumentos_permitidos': forms.SelectMultiple(attrs={'class': 'form-select', 'size': 10}),
             'benchmark_principal': forms.Select(attrs={'class': 'form-select'}),

@@ -11,7 +11,7 @@ class InscripcionInline(admin.TabularInline):
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'profesor', 'fecha_inicio', 'fecha_fin', 'capital_inicial_mxn', 'operaciones_activas', 'activo')
+    list_display = ('nombre', 'profesor', 'fecha_inicio', 'fecha_fin', 'capital_inicial_usd', 'operaciones_activas', 'activo')
     list_filter = ('activo', 'operaciones_activas')
     search_fields = ('nombre', 'profesor__username')
     filter_horizontal = ('instrumentos_permitidos',)

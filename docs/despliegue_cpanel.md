@@ -199,9 +199,6 @@ reales de tu cuenta):
 # Importar precios y eventos corporativos — todos los dias a las 20:30 (tras el cierre de mercados EUA)
 30 20 * * 1-5 /home/usuario/virtualenv/simulador_inversiones/3.12/bin/python /home/usuario/simulador_inversiones/manage.py importar_precios >> /home/usuario/simulador_inversiones/logs/cron_importar_precios.log 2>&1
 
-# Actualizar tipo de cambio — todos los dias a las 20:35
-35 20 * * 1-5 /home/usuario/virtualenv/simulador_inversiones/3.12/bin/python /home/usuario/simulador_inversiones/manage.py actualizar_tipo_cambio >> /home/usuario/simulador_inversiones/logs/cron_tipo_cambio.log 2>&1
-
 # Aplicar splits/dividendos pendientes — todos los dias a las 20:40
 40 20 * * 1-5 /home/usuario/virtualenv/.../bin/python /home/usuario/simulador_inversiones/manage.py aplicar_eventos_corporativos >> /home/usuario/simulador_inversiones/logs/cron_eventos.log 2>&1
 
@@ -215,10 +212,10 @@ reales de tu cuenta):
 55 20 * * 1-5 /home/usuario/virtualenv/.../bin/python /home/usuario/simulador_inversiones/manage.py calcular_metricas >> /home/usuario/simulador_inversiones/logs/cron_metricas.log 2>&1
 ```
 
-El orden importa: precios/tipo de cambio/eventos deben correr **antes**
-de procesar ordenes, y procesar ordenes debe correr **antes** de
-calcular valuaciones y metricas. Revisa `docs/operacion.md` para el
-detalle de cada comando y sus argumentos.
+El orden importa: precios/eventos deben correr **antes** de procesar
+ordenes, y procesar ordenes debe correr **antes** de calcular
+valuaciones y metricas. Revisa `docs/operacion.md` para el detalle de
+cada comando y sus argumentos.
 
 ## 14. Verificaciones de seguridad antes de anunciar la URL a los estudiantes
 

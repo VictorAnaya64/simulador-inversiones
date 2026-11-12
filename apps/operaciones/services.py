@@ -68,7 +68,6 @@ def crear_orden(*, portafolio, instrumento, tipo, cantidad, usuario, clave_idemp
     if not curso.permite_instrumento(instrumento):
         raise InstrumentoNoPermitidoError(f'El instrumento {instrumento.clave} no esta permitido en este curso.')
 
-    moneda = instrumento.moneda
     precio_obj = _ultimo_precio_cierre(instrumento, hasta_fecha=hoy)
     fecha_sesion_objetivo = siguiente_sesion_habil(instrumento.bolsa, hoy)
 
@@ -81,7 +80,7 @@ def crear_orden(*, portafolio, instrumento, tipo, cantidad, usuario, clave_idemp
                 f'No hay precio de referencia disponible para {instrumento.clave}; no se puede validar poder de compra.'
             )
         monto_reservado = (cantidad * precio_obj.cierre).quantize(CENTAVO, rounding=ROUND_HALF_UP)
-        portafolios_services.reservar_efectivo(portafolio_bloqueado, moneda, monto_reservado)
+        portafolios_services.reservar_efectivo(portafolio_bloqueado, monto_reservado)
     else:
         posicion = portafolios_services.bloquear_posicion(
             portafolios_services.obtener_o_crear_posicion(portafolio_bloqueado, instrumento)
@@ -93,7 +92,6 @@ def crear_orden(*, portafolio, instrumento, tipo, cantidad, usuario, clave_idemp
         instrumento=instrumento,
         tipo=tipo,
         cantidad=cantidad,
-        moneda=moneda,
         clave_idempotencia=clave_idempotencia,
         precio_referencia=precio_obj.cierre if precio_obj else None,
         monto_efectivo_reservado=monto_reservado,
@@ -111,7 +109,7 @@ def cancelar_orden(orden, usuario=None):
 
     portafolio = portafolios_services.bloquear_portafolio(orden.portafolio)
     if orden.es_compra:
-        portafolios_services.liberar_efectivo(portafolio, orden.moneda, orden.monto_efectivo_reservado or CERO)
+        portafolios_services.liberar_efectivo(portafolio, orden.monto_efectivo_reservado or CERO)
     else:
         posicion = portafolios_services.bloquear_posicion(
             portafolios_services.obtener_o_crear_posicion(portafolio, orden.instrumento)
@@ -166,9 +164,9 @@ def _procesar_una_orden(orden_id):
         faltante = importe_neto - reservado
         portafolio = portafolios_services.bloquear_portafolio(orden.portafolio)
         if faltante > 0:
-            disponible_extra = portafolio.efectivo_disponible(orden.moneda)
+            disponible_extra = portafolio.efectivo_disponible()
             if faltante > disponible_extra:
-                portafolios_services.liberar_efectivo(portafolio, orden.moneda, reservado)
+                portafolios_services.liberar_efectivo(portafolio, reservado)
                 orden.estado = Orden.Estado.RECHAZADA
                 orden.motivo_rechazo = (
                     f'Efectivo insuficiente al momento de ejecucion: requerido={importe_neto}, '
@@ -176,7 +174,7 @@ def _procesar_una_orden(orden_id):
                 )
                 orden.save(update_fields=['estado', 'motivo_rechazo', 'actualizada_en'])
                 return 'rechazadas'
-            portafolios_services.reservar_efectivo(portafolio, orden.moneda, faltante)
+            portafolios_services.reservar_efectivo(portafolio, faltante)
             orden.monto_efectivo_reservado = reservado + faltante
     else:
         importe_neto = importe_bruto - comision

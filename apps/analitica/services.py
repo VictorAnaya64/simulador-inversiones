@@ -1,9 +1,9 @@
 """
 Funciones puras de teoria de portafolios (rendimiento, riesgo,
 desempeno y optimizacion de Markowitz). Reciben datos ya alineados
-(misma frecuencia, mismas fechas, mismas monedas) y devuelven floats
-de Python; la responsabilidad de alinear fechas/monedas/benchmarks
-antes de llamar a estas funciones es del comando de cron que las usa
+(misma frecuencia, mismas fechas; todo en USD) y devuelven floats de
+Python; la responsabilidad de alinear fechas/benchmarks antes de
+llamar a estas funciones es del comando de cron que las usa
 (apps/analitica/management/commands/calcular_metricas.py), no de estas
 funciones. Ver docs/reglas_financieras.md para las formulas documentadas.
 

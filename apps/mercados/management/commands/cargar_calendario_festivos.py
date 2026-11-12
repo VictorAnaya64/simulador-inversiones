@@ -1,11 +1,11 @@
 """
-Carga un calendario aproximado de dias inhabiles bursatiles para BMV,
-NYSE y NASDAQ entre 2022 y 2028. Se basa en reglas generales (feriados
-fijos y de "enesimo lunes del mes") y en el algoritmo estandar de
-Computus para calcular Viernes Santo. Es una aproximacion razonable
-para fines didacticos, NO una fuente oficial: antes de cada semestre,
-el administrador debe revisar y corregir este calendario con las
-fechas publicadas por la BMV (https://www.bmv.com.mx) y por NYSE/NASDAQ
+Carga un calendario aproximado de dias inhabiles bursatiles para NYSE
+y NASDAQ entre 2022 y 2028. Se basa en reglas generales (feriados fijos
+y de "enesimo lunes del mes") y en el algoritmo estandar de Computus
+para calcular Viernes Santo. Es una aproximacion razonable para fines
+didacticos, NO una fuente oficial: antes de cada semestre, el
+administrador debe revisar y corregir este calendario con las fechas
+publicadas por NYSE/NASDAQ
 (https://www.nyse.com/markets/hours-calendars), incluyendo cierres
 anticipados que este comando no modela.
 """
@@ -57,19 +57,6 @@ def _viernes_santo(anio):
     return domingo_pascua - timedelta(days=2)
 
 
-def _festivos_mexico(anio):
-    festivos = [
-        (date(anio, 1, 1), 'Ano Nuevo'),
-        (_enesimo_lunes(anio, 2, 1), 'Dia de la Constitucion (observado)'),
-        (_enesimo_lunes(anio, 3, 3), 'Natalicio de Benito Juarez (observado)'),
-        (date(anio, 5, 1), 'Dia del Trabajo'),
-        (date(anio, 9, 16), 'Dia de la Independencia'),
-        (_enesimo_lunes(anio, 11, 3), 'Dia de la Revolucion (observado)'),
-        (date(anio, 12, 25), 'Navidad'),
-    ]
-    return festivos
-
-
 def _festivos_eua(anio):
     festivos = [
         (date(anio, 1, 1), "New Year's Day"),
@@ -87,16 +74,11 @@ def _festivos_eua(anio):
 
 
 class Command(BaseCommand):
-    help = 'Carga un calendario aproximado de dias inhabiles bursatiles 2022-2028 para BMV, NYSE y NASDAQ. Idempotente.'
+    help = 'Carga un calendario aproximado de dias inhabiles bursatiles 2022-2028 para NYSE y NASDAQ. Idempotente.'
 
     def handle(self, *args, **options):
         total = 0
         for anio in range(2022, 2029):
-            for fecha, descripcion in _festivos_mexico(anio):
-                _, creado = DiaInhabilBursatil.objects.get_or_create(
-                    bolsa='BMV', fecha=fecha, defaults={'descripcion': descripcion},
-                )
-                total += int(creado)
             for fecha, descripcion in _festivos_eua(anio):
                 for bolsa in ('NYSE', 'NASDAQ'):
                     _, creado = DiaInhabilBursatil.objects.get_or_create(
@@ -105,5 +87,5 @@ class Command(BaseCommand):
                     total += int(creado)
         self.stdout.write(self.style.SUCCESS(f'Dias inhabiles nuevos registrados: {total}.'))
         self.stdout.write(self.style.WARNING(
-            'Calendario aproximado: verificar contra las fuentes oficiales de BMV y NYSE/NASDAQ antes de cada semestre.'
+            'Calendario aproximado: verificar contra las fuentes oficiales de NYSE/NASDAQ antes de cada semestre.'
         ))
