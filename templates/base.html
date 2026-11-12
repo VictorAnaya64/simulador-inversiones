@@ -9,31 +9,51 @@
     {% block head_extra %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-simulador navbar-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-simulador navbar-dark sticky-top shadow-sm mb-4">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'usuarios:redireccion_rol' %}">Simulador de Inversiones</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navSimulador">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'usuarios:redireccion_rol' %}">
+                <span aria-hidden="true">&#128202;</span> Simulador de Inversiones
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navSimulador" aria-controls="navSimulador" aria-expanded="false" aria-label="Alternar navegacion">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navSimulador">
                 {% if user.is_authenticated %}
                 <ul class="navbar-nav me-auto">
-                    {% if user.es_estudiante %}
+                    {% if user.es_profesor %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'cursos:panel_profesor' %}">Mis cursos</a></li>
+                    {% elif user.es_admin %}
+                        <li class="nav-item"><a class="nav-link" href="/admin/">Administracion</a></li>
+                    {% else %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'portafolios:panel_estudiante' %}">Panel</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'mercados:buscador' %}">Mercado</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'operaciones:ordenes' %}">Operaciones</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'analitica:analisis' %}">Analisis</a></li>
-                    {% elif user.es_profesor %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'cursos:panel_profesor' %}">Mis cursos</a></li>
-                    {% elif user.es_admin %}
-                        <li class="nav-item"><a class="nav-link" href="/admin/">Administracion</a></li>
                     {% endif %}
                 </ul>
-                <span class="navbar-text text-light me-3">{{ user.get_full_name|default:user.username }} ({{ user.get_rol_display }})</span>
-                <form method="post" action="{% url 'usuarios:logout' %}" class="d-flex">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-light btn-sm" type="submit">Cerrar sesion</button>
-                </form>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="menuUsuario" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="avatar-usuario">{{ user.first_name|default:user.username|first|upper }}</span>
+                            <span class="lh-sm text-start">
+                                {{ user.get_full_name|default:user.username }}
+                                <small class="d-block text-uppercase opacity-75" style="font-size:.7rem;">{{ user.get_rol_display }}</small>
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="menuUsuario">
+                            {% if user.es_admin %}
+                            <li><a class="dropdown-item" href="/admin/">Panel de administracion</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li>
+                                <form method="post" action="{% url 'usuarios:logout' %}" class="px-3 py-1">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm btn-danger w-100" type="submit">Cerrar sesion</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
                 {% endif %}
             </div>
         </div>

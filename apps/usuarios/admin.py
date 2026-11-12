@@ -3,6 +3,10 @@ from django.contrib.auth.admin import UserAdmin
 
 from .models import RegistroAuditoria, Usuario
 
+admin.site.site_header = 'Simulador de Inversiones · Administracion'
+admin.site.site_title = 'Simulador de Inversiones'
+admin.site.index_title = 'Panel de administracion'
+
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):

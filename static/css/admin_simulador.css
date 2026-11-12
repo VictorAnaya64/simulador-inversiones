@@ -1,0 +1,42 @@
+/* Reviste el Django Admin con la paleta del simulador (navy/blanco/gris/verde)
+   para que no se sienta como una aplicacion distinta al resto del sitio. */
+:root {
+    --primary: #0b2545;
+    --primary-fg: #ffffff;
+    --header-bg: #0b2545;
+    --header-color: #e5e9f0;
+    --header-branding-color: #ffffff;
+    --header-link-color: #ffffff;
+    --link-fg: #13315c;
+    --link-hover-color: #0f9d58;
+    --object-tools-bg: #0f9d58;
+    --object-tools-hover-bg: #0b7a43;
+}
+
+#header {
+    background: var(--header-bg);
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: var(--header-branding-color) !important;
+}
+
+#user-tools a {
+    color: #ffffff !important;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+#user-tools a:hover {
+    color: #d1fae5 !important;
+}
+
+#user-tools form button.button {
+    color: #ffffff;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+div.breadcrumbs {
+    background: var(--sim-azul, #13315c);
+}
