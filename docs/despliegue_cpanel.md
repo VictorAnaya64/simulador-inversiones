@@ -164,18 +164,30 @@ python manage.py collectstatic --noinput
 ```
 
 Esto copia todo a `STATIC_ROOT` (`staticfiles/`, ver `settings.py`).
-Dependiendo de tu plan de cPanel, puede ser necesario:
 
-- Configurar un alias en Apache (via `.htaccess` en el document root
-  publico) que mapee `/static/` hacia la carpeta `staticfiles/` del
-  Application root, **o**
-- Copiar manualmente `staticfiles/` dentro del document root publico
-  bajo una ruta `static/` (nunca copies el resto del proyecto, solo
-  esta carpeta de estaticos ya compilados, que no contiene secretos).
+**Importante**: cuando "Setup Python App" crea la aplicacion, genera un
+`.htaccess` en el document root del (sub)dominio que reenvia **toda**
+solicitud a Passenger/Django, incluidas las de `/static/`. Eso significa
+que un alias manual de Apache hacia `staticfiles/` normalmente **no
+funciona** en este tipo de hosting (la peticion nunca llega a Apache
+como archivo estatico; Django la recibe y, con `DEBUG=False`, responde
+404 porque no sirve estaticos por si mismo). Por eso el proyecto usa
+**WhiteNoise** (`whitenoise.middleware.WhiteNoiseMiddleware` en
+`MIDDLEWARE`, ya configurado en `settings.py`): es Django mismo quien
+sirve `/static/...` de forma eficiente (comprimido, con cache headers),
+sin depender de Apache ni de ese `.htaccess`. No se requiere ninguna
+configuracion adicional en cPanel para esto; basta con que
+`collectstatic` se haya corrido despues de instalar
+`requirements.txt` (que incluye `whitenoise`).
 
 Los templates usan Bootstrap 5 y Plotly desde CDN (no requieren
 `collectstatic` para esas librerias), solo el CSS propio
-(`static/css/simulador.css`) pasa por este paso.
+(`static/css/simulador.css`, `static/css/admin_simulador.css`) pasa por
+este paso.
+
+Para verificar que funciona, visita directamente
+`https://tu-dominio/static/css/simulador.css`: debe responder 200 con
+contenido CSS, no un 404 de Django.
 
 ## 12. Configuracion SSL
 
